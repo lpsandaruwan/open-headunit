@@ -130,6 +130,8 @@ object HeadUnitScreenConfig {
 
     private var announcedGeometry: AnnouncedGeometry? = null
     private var announcementOwner: WeakReference<Any>? = null
+    /** Session-only performance ceiling selected before service discovery; never persisted. */
+    private var sessionResolutionCeiling: Settings.Resolution? = null
     private var geometryRevision = 0L
 
     // Writers commit the entire geometry before calling out. In particular a scale callback must
@@ -323,11 +325,18 @@ object HeadUnitScreenConfig {
     }
 
     /** All geometry fields in service discovery, including input and fallback, share this value. */
-    fun announceGeometry(owner: Any, context: Context, metrics: DisplayMetrics, settings: Settings): AnnouncedGeometry = updateGeometry {
+    fun announceGeometry(
+        owner: Any,
+        context: Context,
+        metrics: DisplayMetrics,
+        settings: Settings,
+        resolutionCeiling: Settings.Resolution? = null,
+    ): AnnouncedGeometry = updateGeometry {
         if (announcementOwner?.get() === owner) announcedGeometry?.let { return@updateGeometry it }
         // Remote EOF may reconnect without an Activity teardown. Announcement lifetime belongs
         // to the transport, not to a process-wide unlock callback or a particular screen instance.
         unlockResolution()
+        sessionResolutionCeiling = resolutionCeiling
         clearAnnouncedMargins()
         initGeometry(context, metrics, settings)
         // Even unchanged local geometry must select a fresh primary after a previous fallback
@@ -574,12 +583,17 @@ object HeadUnitScreenConfig {
         if (announcedGeometry == null && linkCeiling != null && pixelsOf(negotiatedResolutionType) > pixelsOf(linkCeiling)) {
             negotiatedResolutionType = linkCeiling
         }
+        val performanceCeiling = sessionResolutionCeiling?.let { protoForResolution(it, isPortraitDisplay) }
+        if (announcedGeometry == null && performanceCeiling != null &&
+            pixelsOf(negotiatedResolutionType) > pixelsOf(performanceCeiling)) {
+            negotiatedResolutionType = performanceCeiling
+        }
         AppLog.i(
             "[RES_CAP] resolutionId=${currentSettings.resolutionId} " +
                 "realScreen=${realScreenWidthPx}x${realScreenHeightPx} usable=${screenWidthPx}x${screenHeightPx} " +
                 "portrait=$isPortraitDisplay locked=$isResolutionLocked chosen=$preCapResolution " +
                 "capped=$negotiatedResolutionType changed=${preCapResolution != negotiatedResolutionType} " +
-                "linkCapped=${linkCeiling ?: "none"}"
+                "linkCapped=${linkCeiling ?: "none"} performanceCapped=${performanceCeiling ?: "none"}"
         )
 
         // 2. Perform scaling calculations (now safe because negotiatedResolutionType is set)
@@ -684,14 +698,28 @@ object HeadUnitScreenConfig {
     )
 
     @Synchronized
-    fun getHeightMargin(): Int {
+    fun getHeightMargin(): Int = renderScaledMargins().height
+
+    @Synchronized
+    fun getWidthMargin(): Int = renderScaledMargins().width
+
+    // The panel's margins with the user's render scale applied on top. Everything downstream -
+    // the announcement, the view scale, touch and density - reads the margins, so this is the
+    // one place the custom render size has to enter.
+    private fun renderScaledMargins(): RenderScalePolicy.Margins {
+        val percent = if (this::currentSettings.isInitialized) currentSettings.renderScalePercent else RenderScalePolicy.FULL
+        return RenderScalePolicy.margins(
+            getNegotiatedWidth(), getNegotiatedHeight(), autoWidthMargin(), autoHeightMargin(), percent
+        )
+    }
+
+    private fun autoHeightMargin(): Int {
         val fallback = adoptedFallback ?: return if (marginStrategy() == MarginStrategyPolicy.Strategy.PAR) 0
             else ProjectionGeometryPolicy.heightMargin(getNegotiatedHeight(), screenHeightPx, scaleFactor)
         return scaledFallbackMargins(fallback).height
     }
 
-    @Synchronized
-    fun getWidthMargin(): Int {
+    private fun autoWidthMargin(): Int {
         val fallback = adoptedFallback ?: return if (marginStrategy() == MarginStrategyPolicy.Strategy.PAR) 0
             else ProjectionGeometryPolicy.widthMargin(getNegotiatedWidth(), screenWidthPx, scaleFactor)
         return scaledFallbackMargins(fallback).width
@@ -844,6 +872,7 @@ object HeadUnitScreenConfig {
         // axis moves the panel reading mid-connect, which discarded a good window measurement and
         // then fell back to that same reading; rotation is what has to invalidate, and this is it.
         normalisation = normalisation,
+        renderScalePercent = settings.renderScalePercent,
     )
 
     @Synchronized
@@ -863,6 +892,7 @@ object HeadUnitScreenConfig {
             announcementOwner = null
             adoptedFallback = null
             offeredFallback = null
+            sessionResolutionCeiling = null
         }
         if (isResolutionLocked) {
             AppLog.i("[UI_DEBUG] HeadUnitScreenConfig: Unlocking resolution (was $negotiatedResolutionType)")

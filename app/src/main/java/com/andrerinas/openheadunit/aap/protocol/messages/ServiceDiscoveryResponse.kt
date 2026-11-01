@@ -1,10 +1,13 @@
 package com.andrerinas.openheadunit.aap.protocol.messages
 
 import android.content.Context
+import android.os.Build
+import android.os.PowerManager
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.aap.AapMessage
 import com.andrerinas.openheadunit.aap.AapTransport
 import com.andrerinas.openheadunit.aap.NarrowBandProfilePolicy
+import com.andrerinas.openheadunit.aap.UsbProjectionProfilePolicy
 import com.andrerinas.openheadunit.aap.VehicleIdentityPolicy
 import com.andrerinas.openheadunit.aap.VehicleTypePolicy
 import com.andrerinas.openheadunit.input.KeyCode
@@ -18,6 +21,9 @@ import com.andrerinas.openheadunit.connection.wifi.direct.WifiBandCapability
 import com.andrerinas.openheadunit.decoder.video.VideoDecoder
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.HeadUnitScreenConfig
+import com.andrerinas.openheadunit.utils.ProjectionHealthStore
+import com.andrerinas.openheadunit.utils.Settings
+import com.andrerinas.openheadunit.utils.UsbProjectionHealthStore
 import com.andrerinas.openheadunit.utils.VideoFallbackPolicy
 import com.andrerinas.openheadunit.aap.AudioSessionConfig
 import com.google.protobuf.Message
@@ -28,7 +34,15 @@ internal class ServiceDiscoveryResponse(context: Context, audioConfig: AudioSess
     companion object {
         private fun makeProto(context: Context, audioConfig: AudioSessionConfig, transport: AapTransport): Message {
             val settings = App.provide(context).settings
-            val geometry = HeadUnitScreenConfig.announceGeometry(transport, context, context.resources.displayMetrics, settings)
+            val usbProfile = usbProjectionProfile(context, settings, transport)
+            val geometry = HeadUnitScreenConfig.announceGeometry(
+                transport,
+                context,
+                context.resources.displayMetrics,
+                settings,
+                resolutionCeiling = if (usbProfile.capResolutionTo720)
+                    Settings.Resolution._1280x720 else null,
+            )
 
             val services = mutableListOf<Control.Service>()
 
@@ -88,7 +102,7 @@ internal class ServiceDiscoveryResponse(context: Context, audioConfig: AudioSess
 
                     // Decided once, above every line that reports it: the probe below must
                     // describe the profile actually being asked for, not the one in Settings.
-                    val announcedFps = announcedFrameRate(context, settings)
+                    val announcedFps = minOf(announcedFrameRate(context, settings), usbProfile.frameRate)
 
                     AppLog.i("[ServiceDiscovery] NegotiatedResolution is: ${geometry.width}x${geometry.height}")
                     logNegotiatedCodecCapability(effectiveCodec, announcedFps, geometry.width, geometry.height)
@@ -411,6 +425,58 @@ internal class ServiceDiscoveryResponse(context: Context, audioConfig: AudioSess
         } catch (e: Exception) {
             AppLog.d("[ServiceDiscovery] could not evaluate the band cap: ${e.message}")
             settings.fpsLimit
+        }
+
+        private fun usbProjectionProfile(
+            context: Context,
+            settings: Settings,
+            transport: AapTransport,
+        ): UsbProjectionProfilePolicy.Decision {
+            val recent = try {
+                ProjectionHealthStore(context).recentSessions().map {
+                    UsbProjectionProfilePolicy.Session(
+                        framesFed = it.framesFed,
+                        framesRendered = it.framesRendered,
+                        framesDropped = it.framesDropped,
+                        framesSkipped = it.framesSkipped,
+                    )
+                }
+            } catch (e: Exception) {
+                AppLog.d("[ServiceDiscovery] could not read projection health: ${e.message}")
+                emptyList()
+            }
+            val thermal = try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    (context.getSystemService(Context.POWER_SERVICE) as PowerManager).currentThermalStatus
+                } else 0
+            } catch (e: Exception) {
+                AppLog.d("[ServiceDiscovery] could not read thermal status: ${e.message}")
+                0
+            }
+            val decision = UsbProjectionProfilePolicy.decide(
+                UsbProjectionProfilePolicy.Input(
+                    wired = !transport.isWireless,
+                    endpointMaxPacketBytes = transport.usbOutMaxPacketSize,
+                    forcedSoftwareDecoder = settings.forceSoftwareDecoding,
+                    repeatedStarvation = try {
+                        UsbProjectionHealthStore(context).state().profileCapped
+                    } catch (_: Exception) {
+                        false
+                    },
+                    thermalStatus = thermal,
+                    requestedFps = settings.fpsLimit,
+                    recentSessions = recent,
+                )
+            )
+            val capabilityReasons = decision.reasons - UsbProjectionProfilePolicy.Reason.USER_FPS_30
+            if (capabilityReasons.isNotEmpty()) {
+                AppLog.w(
+                    "[ServiceDiscovery] USB session profile capped to at most 720p/${decision.frameRate} " +
+                        "without changing settings; reasons=${capabilityReasons.joinToString()} " +
+                        "endpointPacket=${transport.usbOutMaxPacketSize} thermal=$thermal"
+                )
+            }
+            return decision
         }
 
         /**

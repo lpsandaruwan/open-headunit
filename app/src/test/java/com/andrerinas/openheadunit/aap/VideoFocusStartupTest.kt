@@ -1,7 +1,6 @@
 package com.andrerinas.openheadunit.aap
 
 import android.os.Handler
-import android.os.Message
 import com.andrerinas.openheadunit.aap.protocol.Channel
 import com.andrerinas.openheadunit.aap.protocol.messages.VideoFocusEvent
 import com.andrerinas.openheadunit.aap.protocol.proto.Media
@@ -32,16 +31,21 @@ class VideoFocusStartupTest {
             set("tlsWriter", writer)
             set("aapRead", mock(AapRead::class.java))
             set("sendHandler", handler)
+            set("outbound", PriorityOutboundQueue<Any>())
+            set("outboundDrainScheduled", java.util.concurrent.atomic.AtomicBoolean())
+            set("uplinkStallMonitor", UplinkStallMonitor())
+            val drain = AapTransport::class.java.getDeclaredMethod("drainOneOutbound")
+                .apply { isAccessible = true }
+            set("outboundDrainRunnable", Runnable { drain.invoke(transport) })
             `when`(writer.isReady).thenReturn(true)
-            `when`(handler.obtainMessage(anyInt(), anyInt(), anyInt(), any())).thenAnswer {
-                val bytes = it.getArgument<ByteArray>(3).copyOf(it.getArgument<Int>(2))
-                val message = mock(Message::class.java)
-                doAnswer {
-                    beforeEnqueue?.invoke()
-                    if (accept) sent += bytes
-                    accept
-                }.`when`(handler).sendMessage(message)
-                message
+            `when`(writer.send(org.mockito.kotlin.any(), anyInt())).thenAnswer {
+                sent += it.getArgument<ByteArray>(0).copyOf(it.getArgument<Int>(1))
+                AapTlsWriter.Result.SENT
+            }
+            `when`(handler.post(org.mockito.kotlin.any())).thenAnswer {
+                beforeEnqueue?.invoke()
+                if (accept) it.getArgument<Runnable>(0).run()
+                accept
             }
         }
         fun set(name: String, value: Any?) = AapTransport::class.java.getDeclaredField(name)

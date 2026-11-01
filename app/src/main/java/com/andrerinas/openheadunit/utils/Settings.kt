@@ -415,6 +415,13 @@ class Settings(private val context: Context) {
             prefs.edit().putInt("pixel-aspect-ratio-e4", value).apply()
         }
 
+    /** How much of the negotiated canvas the phone renders, 50-100 %. See RenderScalePolicy. */
+    var renderScalePercent: Int
+        get() = RenderScalePolicy.clamp(prefs.getInt("render-scale-percent", RenderScalePolicy.FULL))
+        set(value) {
+            prefs.edit().putInt("render-scale-percent", RenderScalePolicy.clamp(value)).apply()
+        }
+
     var staticBSSID: String?
         get() = try { prefs.getString("static-bssid", "0") } catch (e: Exception) { "0" } // Default 0 for Auto
         set(value) {
@@ -2633,6 +2640,12 @@ class Settings(private val context: Context) {
     var useLibusb: Boolean
         get() = prefs.getBoolean("use-libusb", false)
         set(value) = prefs.edit().putBoolean("use-libusb", value).apply()
+
+    // Experimental framework UsbRequest pipeline. It stays opt-in until it has been exercised on
+    // the Android 10 head unit hardware; libusb sessions ignore it entirely.
+    var experimentalAsyncUsbReads: Boolean
+        get() = prefs.getBoolean("experimental-async-usb-reads", false)
+        set(value) = prefs.edit().putBoolean("experimental-async-usb-reads", value).apply()
 
     // Publish the Android Auto RFCOMM record as insecure, so a phone can open it without the link
     // having been authenticated first. It changes nothing where the two devices are already bonded,

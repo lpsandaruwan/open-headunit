@@ -30,6 +30,7 @@ import com.andrerinas.openheadunit.utils.CarLauncherManager
 import com.andrerinas.openheadunit.utils.OnboardingLauncherPolicy
 import com.andrerinas.openheadunit.utils.UpdateChecker
 import com.andrerinas.openheadunit.utils.UpdateLinkPolicy
+import com.andrerinas.openheadunit.utils.RenderScalePolicy
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -178,6 +179,7 @@ class SettingsFragment : Fragment() {
     private var pendingResolution by pending::resolution
     private var pendingDpi by pending::dpi
     private var pendingPixelAspectRatioE4 by pending::pixelAspectRatioE4
+    private var pendingRenderScalePercent by pending::renderScalePercent
     private var pendingStaticBSSID by pending::staticBSSID
     private var pendingStaticP2pBSSID by pending::staticP2pBSSID
     private var pendingFullscreenMode by pending::fullscreenMode
@@ -200,6 +202,7 @@ class SettingsFragment : Fragment() {
     private var pendingAudioLatencyMultiplier by pending::audioLatencyMultiplier
     private var pendingAudioTimeCorrectionMode by pending::audioMatchingMode
     private var pendingUseLibusb by pending::useLibusb
+    private var pendingExperimentalAsyncUsbReads by pending::experimentalAsyncUsbReads
     private var pendingAudioQueueCapacity by pending::audioQueueCapacity
     private var pendingShowToastMessages by pending::showToastMessages
     private var pendingScreenOrientation by pending::screenOrientation
@@ -581,6 +584,7 @@ class SettingsFragment : Fragment() {
         pendingResolution?.let { if (it != settings.resolutionId) settings.resolutionId = it }
         pendingDpi?.let { if (it != settings.dpiPixelDensity) settings.dpiPixelDensity = it }
         pendingPixelAspectRatioE4?.let { if (it != settings.pixelAspectRatioE4) settings.pixelAspectRatioE4 = it }
+        pendingRenderScalePercent?.let { if (it != settings.renderScalePercent) settings.renderScalePercent = it }
         pendingStaticBSSID?.let { if (it != settings.staticBSSID) settings.staticBSSID = it }
         pendingStaticP2pBSSID?.let { if (it != settings.staticP2pBSSID) settings.staticP2pBSSID = it }
         pendingFullscreenMode?.let { if (it != settings.fullscreenMode) settings.fullscreenMode = it }
@@ -648,6 +652,9 @@ class SettingsFragment : Fragment() {
         pendingAutoEnableHotspot?.let { if (it != settings.autoEnableHotspot) settings.autoEnableHotspot = it }
         pendingAutoRestartWifi?.let { if (it != settings.autoRestartWifiWhenP2pStuck) settings.autoRestartWifiWhenP2pStuck = it }
         pendingUseLibusb?.let { if (it != settings.useLibusb) settings.useLibusb = it }
+        pendingExperimentalAsyncUsbReads?.let {
+            if (it != settings.experimentalAsyncUsbReads) settings.experimentalAsyncUsbReads = it
+        }
         pendingNarrowBandProfileCap?.let { if (it != settings.narrowBandProfileCap) settings.narrowBandProfileCap = it }
         pendingDebugVideoLowLatency?.let { if (it != settings.debugVideoLowLatency) settings.debugVideoLowLatency = it }
         pendingAllowExternalConfiguration?.let { if (it != settings.allowExternalConfiguration) settings.allowExternalConfiguration = it }
@@ -754,6 +761,7 @@ class SettingsFragment : Fragment() {
                           pendingFpsLimit != settings.fpsLimit ||
                           pendingDpi != settings.dpiPixelDensity ||
                           pendingPixelAspectRatioE4 != settings.pixelAspectRatioE4 ||
+                          pendingRenderScalePercent != settings.renderScalePercent ||
                           pendingStaticBSSID != settings.staticBSSID ||
                           pendingStaticP2pBSSID != settings.staticP2pBSSID ||
                           pendingForceSoftware != settings.forceSoftwareDecoding ||
@@ -773,7 +781,8 @@ class SettingsFragment : Fragment() {
                           pendingInsetRight != settings.insetRight ||
                           pendingInsetBottom != settings.insetBottom ||
                           pendingWifiConnectionMode != settings.wifiConnectionMode ||
-                          pendingUseLibusb != settings.useLibusb
+                          pendingUseLibusb != settings.useLibusb ||
+                          pendingExperimentalAsyncUsbReads != settings.experimentalAsyncUsbReads
 
         // Audio settings may end just the projection session. Service-level changes retain
         // their broader restart policy and take precedence when both kinds are saved.
@@ -783,6 +792,7 @@ class SettingsFragment : Fragment() {
                           pendingFpsLimit != settings.fpsLimit ||
                           pendingDpi != settings.dpiPixelDensity ||
                           pendingPixelAspectRatioE4 != settings.pixelAspectRatioE4 ||
+                          pendingRenderScalePercent != settings.renderScalePercent ||
                           pendingStaticBSSID != settings.staticBSSID ||
                           pendingStaticP2pBSSID != settings.staticP2pBSSID ||
                           pendingForceSoftware != settings.forceSoftwareDecoding ||
@@ -793,7 +803,8 @@ class SettingsFragment : Fragment() {
                           pendingInsetRight != settings.insetRight ||
                           pendingInsetBottom != settings.insetBottom ||
                           pendingWifiConnectionMode != settings.wifiConnectionMode ||
-                          pendingUseLibusb != settings.useLibusb
+                          pendingUseLibusb != settings.useLibusb ||
+                          pendingExperimentalAsyncUsbReads != settings.experimentalAsyncUsbReads
 
         updateSaveButtonState()
     }
@@ -912,6 +923,20 @@ class SettingsFragment : Fragment() {
                 isChecked = pendingUseLibusb ?: false,
                 onCheckedChanged = { isChecked ->
                     pendingUseLibusb = isChecked
+                    checkChanges()
+                    updateSettingsList()
+                }
+            ))
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            items.add(SettingItem.ToggleSettingEntry(
+                stableId = "experimentalAsyncUsbReads",
+                nameResId = R.string.experimental_async_usb_reads,
+                descriptionResId = R.string.experimental_async_usb_reads_description,
+                isChecked = pendingExperimentalAsyncUsbReads ?: false,
+                onCheckedChanged = { isChecked ->
+                    pendingExperimentalAsyncUsbReads = isChecked
                     checkChanges()
                     updateSettingsList()
                 }
@@ -1961,6 +1986,24 @@ class SettingsFragment : Fragment() {
                     initialValue = if ((pendingPixelAspectRatioE4 ?: 10000) <= 0) 10000 else (pendingPixelAspectRatioE4 ?: 10000),
                     onConfirm = { newVal ->
                         pendingPixelAspectRatioE4 = if (newVal <= 0) 10000 else newVal
+                        checkChanges()
+                        updateSettingsList()
+                    }
+                )
+            }
+        ))
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "renderScalePercent",
+            nameResId = R.string.render_scale,
+            value = renderScaleRowValue(),
+            onClick = { _ ->
+                showNumericInputDialog(
+                    title = getString(R.string.enter_render_scale_value),
+                    message = getString(R.string.render_scale_description),
+                    initialValue = pendingRenderScalePercent ?: settings.renderScalePercent,
+                    onConfirm = { newVal ->
+                        pendingRenderScalePercent = RenderScalePolicy.clamp(if (newVal <= 0) RenderScalePolicy.FULL else newVal)
                         checkChanges()
                         updateSettingsList()
                     }
@@ -3269,6 +3312,23 @@ class SettingsFragment : Fragment() {
     }
 
     /** The row shows what Android Auto receives and its dp canvas, after the margins. */
+    // The row names the canvas the phone will draw for the chosen resolution, before the panel's
+    // own margins, so a percentage reads as a size.
+    private fun renderScaleRowValue(): String {
+        val percent = pendingRenderScalePercent ?: settings.renderScalePercent
+        if (percent >= RenderScalePolicy.FULL) return getString(R.string.render_scale_full)
+        val chosen = Settings.Resolution.fromId(pendingResolution ?: settings.resolutionId)
+        val (pw, ph) = realPanelResolution()
+        val res = if (chosen == null || chosen == Settings.Resolution.AUTO) {
+            com.andrerinas.openheadunit.utils.SystemOptimizer.recommendedResolution(pw, ph)
+        } else chosen
+        val canvas = RenderScalePolicy.margins(res.width, res.height, 0, 0, percent)
+        return getString(
+            R.string.render_scale_value, percent,
+            res.width - canvas.width, res.height - canvas.height, res.resName
+        )
+    }
+
     private fun dpiRowValue(): String {
         val stored = pendingDpi ?: 0
         val chosen = Settings.Resolution.fromId(pendingResolution ?: settings.resolutionId)

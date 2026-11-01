@@ -1154,7 +1154,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                             dismissRendererConfirmBanner()
                             if (!state.isClean && !state.isUserExit && !state.isSettingsRestart) {
                                 AppLog.w("AapProjectionActivity: Disconnected unexpectedly.")
-                                ToastUtils.showToast(this@AapProjectionActivity, getString(R.string.wifi_disconnect_toast), Toast.LENGTH_LONG)
+                                val message = if (settings.lastConnectionType == Settings.CONNECTION_TYPE_USB)
+                                    R.string.usb_disconnect_toast else R.string.wifi_disconnect_toast
+                                ToastUtils.showToast(this@AapProjectionActivity, getString(message), Toast.LENGTH_LONG)
                             }
                             // Only finish immediately if the user explicitly exited, it was a clean close, or killOnDisconnect is enabled.
                             if (!state.isSettingsRestart && (state.isUserExit || state.isClean || settings.killOnDisconnect)) {

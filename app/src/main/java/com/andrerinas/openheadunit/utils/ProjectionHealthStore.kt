@@ -18,7 +18,7 @@ class ProjectionHealthStore(context: Context) {
         .getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     fun state(settings: Settings): ProjectionHealthPolicy.State = ProjectionHealthPolicy.State(
-        sessions = ProjectionHealthCodec.decode(prefs.getString(KEY_SESSIONS, "") ?: ""),
+        sessions = recentSessions(),
         totalSessions = prefs.getInt(KEY_COUNT, 0),
         dismissedAction = prefs.getString(KEY_DISMISSED, null)?.let { name ->
             runCatching { ProjectionHealthPolicy.Action.valueOf(name) }.getOrNull()
@@ -31,6 +31,10 @@ class ProjectionHealthStore(context: Context) {
         storedFps = settings.fpsLimit,
         panelCeiling = panelCeiling(),
     )
+
+    /** Compact session history for service-discovery policy; does not inspect or mutate settings. */
+    fun recentSessions(): List<ProjectionSessionSummary> =
+        ProjectionHealthCodec.decode(prefs.getString(KEY_SESSIONS, "") ?: "")
 
     private fun panelCeiling(): Settings.Resolution {
         val metrics = DisplayMetrics()

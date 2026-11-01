@@ -5,13 +5,18 @@ import android.hardware.usb.UsbDeviceConnection
 import android.hardware.usb.UsbEndpoint
 import android.hardware.usb.UsbInterface
 import android.hardware.usb.UsbManager
+import android.os.Build
 import android.os.SystemClock
 import com.andrerinas.openheadunit.connection.usb.UsbDeviceCompat
 import com.andrerinas.openheadunit.utils.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class StandardUsbProjectionConnection(usbMgr: UsbManager, device: UsbDevice) :
+class StandardUsbProjectionConnection(
+    usbMgr: UsbManager,
+    device: UsbDevice,
+    private val experimentalAsyncReads: Boolean = false
+) :
     AbstractUsbProjectionConnection(usbMgr, device) {
 
     // @Volatile so isConnected / isDeviceRunning see the latest value without a lock.
@@ -21,9 +26,13 @@ class StandardUsbProjectionConnection(usbMgr: UsbManager, device: UsbDevice) :
     // without holding sStateLock during the transfer.
     @Volatile private var endpointIn: UsbEndpoint? = null
     @Volatile private var endpointOut: UsbEndpoint? = null
+    @Volatile private var asyncReader: AsyncUsbReader? = null
+    private var asyncDisabledForConnection = false
 
-    // Internal buffer — only ever accessed by the poll thread (recvBlocking); no lock needed.
-    private val internalBuffer = ByteArray(16384)
+    // Allocated once. Android 9 removed the framework's old 16 KiB bulk-transfer ceiling, so the
+    // Android 10 head unit can collect a large AAP fragment with fewer framework calls.
+    // Only the poll thread accesses this buffer; no lock is needed.
+    private val internalBuffer = ByteArray(UsbReadBufferPolicy.capacity(Build.VERSION.SDK_INT))
     private var internalBufferPos = 0
     private var internalBufferAvailable = 0
 
@@ -39,12 +48,34 @@ class StandardUsbProjectionConnection(usbMgr: UsbManager, device: UsbDevice) :
         get() = false
 
     override suspend fun connect() = withContext(Dispatchers.IO) {
-        return@withContext try {
-            connect(device)
-        } catch (e: UsbOpenException) {
-            AppLog.e(e)
-            false
+        // Right after the box re-enumerates, the device object we were handed can describe the interfaces it had
+        // a moment ago, and the accessory interface then has no endpoints. Take a fresh description of the same
+        // device and try again a few times, instead of dropping the session and starting the whole recovery over.
+        var current = device
+        for (attempt in 1..ENDPOINT_ATTEMPTS) {
+            val connected = try {
+                connect(current)
+            } catch (e: UsbOpenException) {
+                AppLog.e(e)
+                return@withContext false
+            }
+            if (connected) return@withContext true
+            if (attempt == ENDPOINT_ATTEMPTS) break
+            try { Thread.sleep(ENDPOINT_RETRY_DELAY_MS) } catch (_: InterruptedException) { return@withContext false }
+            val fresh = usbMgr.deviceList[current.deviceName]
+            if (fresh == null) {
+                AppLog.w("USB: the device is gone; not retrying the endpoints")
+                return@withContext false
+            }
+            AppLog.w("USB: accessory endpoints not ready (attempt $attempt of $ENDPOINT_ATTEMPTS); retrying with a fresh description")
+            current = fresh
         }
+        false
+    }
+
+    private companion object {
+        const val ENDPOINT_ATTEMPTS = 3
+        const val ENDPOINT_RETRY_DELAY_MS = 300L
     }
 
     @Throws(UsbOpenException::class)
@@ -62,6 +93,14 @@ class StandardUsbProjectionConnection(usbMgr: UsbManager, device: UsbDevice) :
 
             val ret = initEndpoint()
             if (ret < 0) {
+                disconnect()
+                return false
+            }
+
+            if (!startAsyncReaderIfRequested()) {
+                // A request may already have entered the kernel. Reopen a clean handle before
+                // falling back so the blocking backend cannot begin after an unknown byte gap.
+                asyncDisabledForConnection = true
                 disconnect()
                 return false
             }
@@ -104,7 +143,7 @@ class StandardUsbProjectionConnection(usbMgr: UsbManager, device: UsbDevice) :
                 throw UsbOpenException("No usb interfaces")
             }
             AppLog.i("interfaceCount: $interfaceCount")
-            usbInterface = device.getInterface(0)
+            usbInterface = UsbDeviceCompat.accessoryInterface(device)
 
             if (!usbDeviceConnection!!.claimInterface(usbInterface, true)) {
                 throw UsbOpenException("Error claiming interface")
@@ -129,9 +168,30 @@ class StandardUsbProjectionConnection(usbMgr: UsbManager, device: UsbDevice) :
         return 0
     }
 
+    private fun startAsyncReaderIfRequested(): Boolean {
+        asyncReader?.close()
+        asyncReader = null
+        if (asyncDisabledForConnection ||
+            !AsyncUsbReadPolicy.isEligible(experimentalAsyncReads, Build.VERSION.SDK_INT, usesLibusb = false)
+        ) return true
+
+        val connection = usbDeviceConnection ?: return false
+        val ep = endpointIn ?: return false
+        val reader = AsyncUsbReader.create(connection, ep, internalBuffer.size)
+        if (reader == null) {
+            AppLog.w("USB: asynchronous receive setup failed; reopening with the blocking backend")
+            return false
+        }
+        asyncReader = reader
+        AppLog.i("USB: experimental asynchronous receive enabled (2 x ${internalBuffer.size / 1024} KiB)")
+        return true
+    }
+
     private fun resetInterface() {
         if (usbDeviceConnection == null) return
         synchronized(stateLock) {
+            asyncReader?.close()
+            asyncReader = null
             val connection = usbDeviceConnection ?: return
             val iface = usbInterface ?: return
             AppLog.w("Attempting USB interface soft-reset...")
@@ -142,7 +202,10 @@ class StandardUsbProjectionConnection(usbMgr: UsbManager, device: UsbDevice) :
                     AppLog.i("USB interface re-claimed successfully")
                     internalBufferPos = 0
                     internalBufferAvailable = 0
-                    initEndpoint()
+                    if (initEndpoint() < 0 || !startAsyncReaderIfRequested()) {
+                        AppLog.e("Failed to restart USB receive backend after interface reset")
+                        disconnect()
+                    }
                 } else {
                     AppLog.e("Failed to re-claim USB interface — disconnecting")
                     disconnect()
@@ -154,6 +217,8 @@ class StandardUsbProjectionConnection(usbMgr: UsbManager, device: UsbDevice) :
     }
 
     override fun disconnect() {
+        asyncReader?.close()
+        asyncReader = null
         // close() is thread-safe and immediately aborts any in-flight bulkTransfer(),
         // so both sendBlocking and recvBlocking unblock within milliseconds.
         val earlyClosed = usbDeviceConnection
@@ -216,6 +281,16 @@ class StandardUsbProjectionConnection(usbMgr: UsbManager, device: UsbDevice) :
         val connection = usbDeviceConnection ?: return -1
         val ep = endpointIn ?: return -1
 
+        asyncReader?.let { reader ->
+            val read = reader.read(buf, length, timeout, readFully)
+            if (reader.terminalFailure) {
+                AppLog.e("USB: asynchronous receive failed after ${reader.deliveredBytes} bytes; reconnecting to preserve AAP framing")
+                disconnect()
+                return -1
+            }
+            return read
+        }
+
         return try {
             var totalReturned = 0
 
@@ -232,7 +307,7 @@ class StandardUsbProjectionConnection(usbMgr: UsbManager, device: UsbDevice) :
                     continue
                 }
 
-                // 2. Internal buffer empty, read new 16KB chunk from USB
+                // 2. Internal buffer empty, read one policy-sized chunk from USB.
                 val read = try {
                     connection.bulkTransfer(ep, internalBuffer, internalBuffer.size, timeout)
                 } catch (e: Exception) {

@@ -28,7 +28,7 @@ class UsbAccessoryMode(private val usbMgr: UsbManager) {
         val result = if (useLibusb) {
             AppLog.i("UsbAccessoryMode: Performing AOA switch via native libusb...")
             val native = UsbNative()
-            if (native.wrap(connection, 0, 0)) {
+            if (native.wrap(connection, 0, 0, if (device.interfaceCount > 0) UsbDeviceCompat.accessoryInterface(device).id else 0)) {
                 val code = native.accModeSwitch()
                 native.close()
                 // The code only reaches raw logcat from the native side, and an APPLOG_FILE export
@@ -62,7 +62,7 @@ class UsbAccessoryMode(private val usbMgr: UsbManager) {
             return false
         }
         val native = UsbNative()
-        val wrapped = native.wrap(connection, 0, 0)
+        val wrapped = native.wrap(connection, 0, 0, if (device.interfaceCount > 0) UsbDeviceCompat.accessoryInterface(device).id else 0)
         if (wrapped) native.reset()
         native.close()
         connection.close()

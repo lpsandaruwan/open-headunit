@@ -1,6 +1,8 @@
 package com.andrerinas.openheadunit.aap
 
 import com.andrerinas.openheadunit.aap.protocol.proto.Control
+import com.andrerinas.openheadunit.aap.protocol.messages.Messages
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -8,6 +10,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AapVersionNegotiationTest {
+
+    @Test fun `version request remains one two`() {
+        assertArrayEquals(
+            byteArrayOf(0, 3, 0, 6, 0, 1, 0, 1, 0, 2),
+            Messages.versionRequest
+        )
+    }
 
     /** ch 0, flags 3, len, type 0x0002, then major/minor/status. */
     private fun frame(major: Int, minor: Int, status: Int, tail: ByteArray = ByteArray(0)): ByteArray {

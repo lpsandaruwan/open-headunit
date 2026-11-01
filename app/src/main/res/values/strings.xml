@@ -414,6 +414,11 @@
     <string name="orientation_portrait_reverse">Portrait Reverse (270°)</string>
     <string name="enter_dpi_value">Enter DPI value (0 for auto)</string>
     <string name="enter_audio_offset_value">Enter value (0-250)</string>
+    <string name="render_scale">Render scale</string>
+    <string name="render_scale_full">100 % (off)</string>
+    <string name="render_scale_value">%1$d %% · %2$d×%3$d inside %4$s</string>
+    <string name="enter_render_scale_value">Render scale in percent (50–100)</string>
+    <string name="render_scale_description">The phone draws a smaller picture inside the chosen resolution and this screen scales it up. 85 at 1080p is about 1632×918, between 720p and 1080p. It lightens the phone\'s drawing; the video it sends stays the chosen resolution. 100 turns it off.</string>
     <string name="enter_pixel_aspect_ratio_value">Pixel aspect ratio x10000 (10000 = square pixels)</string>
     <string name="custom_margin">Custom Margin</string>
     <string name="custom_margin_description">Set custom display margins (0 for auto).</string>
@@ -976,6 +981,7 @@
     <string name="connection_interrupted">Connection lost</string>
     <string name="connection_interrupted_detail">Retrying…</string>
     <string name="renderer_fallback_surface">The video kept freezing, so the display was switched to SurfaceView for this session. If it is stable, set View mode to SurfaceView in Settings.</string>
+    <string name="usb_disconnect_toast">Android Auto USB connection lost.</string>
     <string name="wifi_disconnect_toast">Android Auto disconnected. If using wireless AA, disable \"Switch between networks\" or \"Network acceleration\" in your phone\'s WiFi settings</string>
     <string name="reset_usb_option">Reset USB Connection</string>
     <string name="reset_usb_timeout">USB device not found. Please check the connection.</string>
@@ -1379,6 +1385,8 @@
     <string name="share_hotspot_qr_error">Could not retrieve active Wi-Fi hotspot credentials. Please ensure your hotspot is turned on and Location is enabled.</string>
     <string name="use_libusb">Use Native USB Driver</string>
     <string name="use_libusb_description">Use libusb for communication. Disable to use Android\'s standard USB API.</string>
+    <string name="experimental_async_usb_reads">Experimental asynchronous USB reads</string>
+    <string name="experimental_async_usb_reads_description">Keep two USB reads queued to reduce receive gaps. Off by default; applies only to Android\'s standard USB driver and requires reconnecting.</string>
     <string name="usb_keep_phone_media_audio">Keep the phone\'s Media audio on over USB</string>
     <string name="usb_keep_phone_media_audio_description">Android Auto can turn off the phone\'s Bluetooth Media audio for this head unit during a USB session. This stops that. Phone calls may then stay on the phone instead of the head unit.</string>
 
