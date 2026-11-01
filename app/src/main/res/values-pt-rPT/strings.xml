@@ -240,6 +240,34 @@
     <string name="pixel_aspect_ratio">Proporção de píxeis</string>
     <string name="mic_sample_rate">Taxa de captação do microfone</string>
     <string name="keymap">Mapeamento de teclas</string>
+    <string name="gestures">Gestos</string>
+    <string name="gestures_description">Configure deslizes com dois dedos e pressão longa.</string>
+    <string name="gesture_two_finger_down">Deslizar dois dedos para baixo</string>
+    <string name="gesture_two_finger_long_press">Pressão longa com dois dedos</string>
+    <string name="gesture_two_finger_left">Gesto com dois dedos da esquerda</string>
+    <string name="gesture_two_finger_right">Gesto com dois dedos da direita</string>
+    <string name="gesture_action_disabled">Desativado</string>
+    <string name="gesture_action_exit_dialog">Diálogo de saída</string>
+    <string name="gesture_action_toggle_fullscreen">Alternar ecrã inteiro</string>
+    <string name="gesture_action_night_overlay">Sobreposição noturna</string>
+    <string name="gestures_reset">Definições de gestos repostas</string>
+    <string name="night_overlay_dismiss">Toque para voltar à projeção</string>
+    <string name="night_overlay_meters">%1$d m</string>
+    <string name="night_overlay_kilometers">%1$.1f km</string>
+    <string name="night_overlay_navigation">%1$s · %2$s</string>
+    <string name="night_overlay_left">esquerda</string>
+    <string name="night_overlay_right">direita</string>
+    <string name="night_overlay_direction">%1$s · %2$s</string>
+    <string name="night_overlay_exit_number">Saída %1$d</string>
+    <string name="night_overlay_exit_angle">%1$d°</string>
+    <string name="night_overlay_eta_summary">ETA %1$s · %2$s · %3$s</string>
+    <string name="night_overlay_duration_minutes">%1$d min</string>
+    <string name="night_overlay_duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="night_overlay_current_road">Agora: %1$s</string>
+    <string name="night_overlay_route">Rota: %1$s</string>
+    <string name="night_overlay_lanes">Vias: %1$s</string>
+    <string name="night_overlay_traffic_delay">Atraso de trânsito: +%1$s</string>
+    <string name="night_overlay_speed_value">%1$d km/h</string>
     <string name="night_mode">Modo escuro (Android Auto)</string>
     <string name="night_mode_threshold">Limite do modo noturno</string>
     <string name="enter_threshold_value">Introduzir valor limite</string>
@@ -252,6 +280,16 @@
     <string name="current_light_reading">Luz atual: %d Lux</string>
     <string name="current_brightness_reading">Brilho atual: %d / 255</string>
     <string name="enable_fine_lux_control">Controlo preciso (0–100 Lux)</string>
+    <string name="car_signal_calibration_info_format">car_mode atual: %1$d. Mapeamento: %2$s.</string>
+    <string name="car_signal_mapping_default">0 = Dia, diferente de zero = Noite</string>
+    <string name="car_signal_mapping_inverted">0 = Noite, diferente de zero = Dia</string>
+    <string name="car_signal_unavailable">Não foi possível ler car_mode nesta unidade neste momento.</string>
+    <string name="car_signal_headlights_question">Os faróis estão ligados agora?</string>
+    <string name="car_signal_calibration_title">Calibração ILL+</string>
+    <string name="car_signal_recalibrate">Recalibrar</string>
+    <string name="car_signal_headlights_on">Ligados</string>
+    <string name="car_signal_headlights_off">Desligados</string>
+    <string name="car_signal_calibration_saved">Calibração ILL+ guardada e aplicada</string>
     <string name="night_mode_start">Hora de início do modo noturno</string>
     <string name="night_mode_end">Hora de fim do modo noturno</string>
 
@@ -351,6 +389,7 @@
     <string name="orientation_portrait">Vertical (90°)</string>
     <string name="orientation_portrait_reverse">Vertical invertido (270°)</string>
     <string name="enter_dpi_value">Introduzir valor DPI (0 para automático)</string>
+    <string name="enter_audio_offset_value">Introduzir valor (0-250)</string>
     <string name="enter_pixel_aspect_ratio_value">Proporção de píxeis x10000 (10000 = píxeis quadrados)</string>
     <string name="custom_margin">Margem personalizada</string>
     <string name="custom_margin_description">Definir margens de ecrã personalizadas (0 para automático).</string>
@@ -1046,8 +1085,6 @@
     <string name="wait_for_wifi_description">Ao arrancar, espera que o Wi-Fi se ligue antes de iniciar o Wi-Fi Direct. Ative esta opção se a unidade precisar de alguns segundos para se ligar ao Wi-Fi depois de ser ligada.</string>
     <string name="wait_for_wifi_timeout">Tempo limite do Wi-Fi</string>
     <string name="wireless_24ghz_warning">Nota: o Android Auto sem fios em dispositivos de 2,4 GHz pode causar atrasos, falhas de imagem e desligações. Se tiver problemas, teste por USB para confirmar se se trata de uma limitação da rede.</string>
-    <string name="fake_speed_title">Desativar bloqueio de vídeo (velocidade simulada)</string>
-    <string name="fake_speed_description">Comunica uma velocidade baixa constante (0,5 m/s) ao telemóvel para impedir o bloqueio de vídeo durante a condução. Utilize com precaução.</string>
     <string name="wireless_mode_helper">Wireless Helper</string>
     <string name="wireless_mode_native">Nativo (Native)</string>
     <string name="wireless_mode_server">Servidor da Unidade</string>
@@ -1198,6 +1235,8 @@
     <string name="external_bt_module_controls_hint">O emparelhamento do telemóvel, a prioridade da ligação e a seleção do controlador são geridos pelo módulo Bluetooth externo.</string>
     <string name="external_bt_module_last_phone">Último telemóvel ligado através do módulo</string>
     <string name="external_bt_blink_transport_description">Experimental. Para unidades FYT cujo telemóvel emparelha para chamadas com um módulo Bluetooth separado, como \"DUDUAUTO\" no DUDUOS, a única ROM testada até agora. O módulo, e não o Bluetooth desta unidade, transporta o handshake do Android Auto sem fios, e a app Car Link de origem costuma respondê-lo. Com esta opção ativada, é esta app que responde, pelo que as chamadas ficam no módulo e nos altifalantes do carro.\n\nDesative primeiro a app Car Link de origem (pm disable-user com.syu.carlink), ou as duas apps lerão o mesmo canal. O canal é aberto sem root quando a unidade o permite e, caso contrário, através de root. Escolha Native, emparelhe o telemóvel apenas com o módulo e exporte o registo se não ligar.</string>
+    <string name="external_bt_zj_socket_transport">Ligar através do socket Bluetooth ZJ</string>
+    <string name="external_bt_zj_socket_transport_description">Para unidades cujo módulo Bluetooth ZJ transporta o handshake sem fios do Android Auto através de um socket local (/dev/socket/zj_bt_socket). A aplicação usa-o sozinha quando esse socket aceita uma ligação. Ative apenas se a sua unidade tiver o socket e a aplicação não o detetar.</string>
     <string name="external_bt_blink_refused_stock_enabled">Módulo Bluetooth externo: a app Car Link de origem continua ativada. Desative-a (pm disable-user com.syu.carlink) ou desative este transporte.</string>
     <string name="external_bt_blink_refused_stock_running">Módulo Bluetooth externo: a app Car Link de origem está desativada, mas continua em execução. Reinicie a unidade.</string>
     <string name="external_bt_blink_refused_root">Módulo Bluetooth externo: abrir o canal do módulo exige root nesta unidade, e o acesso root foi negado ou não está disponível.</string>
@@ -1464,6 +1503,7 @@
     <string name="home_favorites_full">Os quatro favoritos já estão ocupados. Mantenha premido um no ecrã inicial para o alterar.</string>
     <string name="home_choose_favorite_app">Escolha uma app ou atalho</string>
     <string name="home_shortcut_badge">Atalho</string>
+    <string name="app_drawer_tab_shortcuts">Atalhos</string>
     <string name="home_show_favorite_apps">Apps favoritas no ecrã inicial</string>
     <string name="home_show_favorite_apps_description">As tuas apps favoritas sob o botão principal, quando o Open Headunit é o teu launcher</string>
     <string name="home_show_widgets">Widgets no ecrã inicial</string>

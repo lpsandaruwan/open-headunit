@@ -26,6 +26,34 @@
     <string name="dpi">Pixeldichtheid (DPI)</string>
     <string name="mic_sample_rate">Microfoonsamplerate</string>
     <string name="keymap">Toetstoewijzing</string>
+    <string name="gestures">Gebaren</string>
+    <string name="gestures_description">Stel vegen met twee vingers en lang indrukken in.</string>
+    <string name="gesture_two_finger_down">Met twee vingers omlaag vegen</string>
+    <string name="gesture_two_finger_long_press">Lang indrukken met twee vingers</string>
+    <string name="gesture_two_finger_left">Tweevingergebaar van links</string>
+    <string name="gesture_two_finger_right">Tweevingergebaar van rechts</string>
+    <string name="gesture_action_disabled">Uitgeschakeld</string>
+    <string name="gesture_action_exit_dialog">Afsluitdialoog</string>
+    <string name="gesture_action_toggle_fullscreen">Volledig scherm wisselen</string>
+    <string name="gesture_action_night_overlay">Nacht-overlay</string>
+    <string name="gestures_reset">Gebareninstellingen gereset</string>
+    <string name="night_overlay_dismiss">Tik om terug te keren naar projectie</string>
+    <string name="night_overlay_meters">%1$d m</string>
+    <string name="night_overlay_kilometers">%1$.1f km</string>
+    <string name="night_overlay_navigation">%1$s · %2$s</string>
+    <string name="night_overlay_left">links</string>
+    <string name="night_overlay_right">rechts</string>
+    <string name="night_overlay_direction">%1$s · %2$s</string>
+    <string name="night_overlay_exit_number">Afrit %1$d</string>
+    <string name="night_overlay_exit_angle">%1$d°</string>
+    <string name="night_overlay_eta_summary">Aankomst %1$s · %2$s · %3$s</string>
+    <string name="night_overlay_duration_minutes">%1$d min</string>
+    <string name="night_overlay_duration_hours_minutes">%1$d u %2$d min</string>
+    <string name="night_overlay_current_road">Nu: %1$s</string>
+    <string name="night_overlay_route">Route: %1$s</string>
+    <string name="night_overlay_lanes">Rijstroken: %1$s</string>
+    <string name="night_overlay_traffic_delay">Verkeersvertraging: +%1$s</string>
+    <string name="night_overlay_speed_value">%1$d km/u</string>
     <string name="night_mode">Donkere modus (Android Auto)</string>
     <string name="night_mode_threshold">Drempelwaarde nachtmodus</string>
     <string name="enter_threshold_value">Voer drempelwaarde in</string>
@@ -37,6 +65,16 @@
     <string name="threshold_brightness_hint">De donkere modus gaat aan zodra de schermhelderheid onder deze waarde komt. Android geeft helderheid door als 0-255, maar het echte bereik kan per apparaat verschillen. Mogelijk moet je wat proberen om de juiste drempel voor je apparaat te vinden.</string>
     <string name="current_light_reading">Huidig licht: %d Lux</string>
     <string name="enable_fine_lux_control">Fijnafstemming (0–100 Lux)</string>
+    <string name="car_signal_calibration_info_format">Huidige car_mode: %1$d. Toewijzing: %2$s.</string>
+    <string name="car_signal_mapping_default">0 = Dag, niet nul = Nacht</string>
+    <string name="car_signal_mapping_inverted">0 = Nacht, niet nul = Dag</string>
+    <string name="car_signal_unavailable">car_mode kan op deze head-unit momenteel niet worden gelezen.</string>
+    <string name="car_signal_headlights_question">Zijn de koplampen nu ingeschakeld?</string>
+    <string name="car_signal_calibration_title">ILL+-kalibratie</string>
+    <string name="car_signal_recalibrate">Opnieuw kalibreren</string>
+    <string name="car_signal_headlights_on">Aan</string>
+    <string name="car_signal_headlights_off">Uit</string>
+    <string name="car_signal_calibration_saved">ILL+-kalibratie opgeslagen en toegepast</string>
     <string name="night_mode_start">Starttijd nachtmodus</string>
     <string name="night_mode_end">Eindtijd nachtmodus</string>
 
@@ -102,6 +140,7 @@
     <string name="orientation_portrait">Staand (90°)</string>
     <string name="orientation_portrait_reverse">Staand omgekeerd (270°)</string>
     <string name="enter_dpi_value">DPI-waarde invoeren (0 = automatisch)</string>
+    <string name="enter_audio_offset_value">Waarde invoeren (0-250)</string>
     <string name="custom_margin">Aangepaste marge</string>
     <string name="custom_margin_description">Stel aangepaste schermmarges in (0 = automatisch).</string>
     <string name="enter_custom_margins">Voer aangepaste marges in (0 = automatisch)</string>
@@ -520,8 +559,6 @@
     <string name="wireless_24ghz_warning">Let op: draadloos Android Auto op apparaten met 2,4 GHz kan vertraging, haperingen en verbroken verbindingen geven. Heb je problemen, test dan via USB om te zien of het aan het netwerk ligt.</string>
     <string name="supported_nativeaa">Verbeterde draadloze ondersteuning</string>
     <string name="supported_nativeaa_desc">Goed nieuws! Je apparaat ondersteunt de modus \"Native Wireless\", voor een vlottere Android Auto-ervaring.\n\nOm dit in te schakelen, moeten we je Bluetooth-cache vernieuwen. Doe het volgende:\n1. Verwijder de bestaande koppeling op je telefoon\n2. Tik op OK om Bluetooth opnieuw op te starten\n3. Koppel je telefoon opnieuw\n\nWil je nu overschakelen naar de Native AA-modus?</string>
-    <string name="fake_speed_title">Videovergrendeling uitschakelen (nepsnelheid)</string>
-    <string name="fake_speed_description">Meldt een constante lage snelheid (0,5 m/s) aan de telefoon, zodat video tijdens het rijden niet wordt geblokkeerd. Wees voorzichtig.</string>
     <string name="wireless_mode_helper">Wireless Helper</string>
     <string name="wireless_mode_native">Native</string>
     <string name="wireless_mode_server">Headunit Server</string>
@@ -996,6 +1033,8 @@
     <string name="external_bt_module_controls_hint">Telefoonkoppeling, verbindingsprioriteit en stuurprogrammakeuze worden beheerd door de externe Bluetooth-module.</string>
     <string name="external_bt_module_last_phone">Laatste telefoon die via de module is verbonden</string>
     <string name="external_bt_blink_transport_description">Experimenteel. Voor FYT-apparaten waarvan de telefoon voor gesprekken met een aparte Bluetooth-module koppelt, zoals \"DUDUAUTO\" op DUDUOS, de enige ROM die tot nu toe is getest. De module, en niet de Bluetooth van dit apparaat, voert de handshake voor draadloos Android Auto uit, en normaal beantwoordt de standaard Car Link-app die. Als dit aan staat, doet deze app dat in plaats daarvan, zodat gesprekken op de module en de autoluidsprekers blijven.\n\nSchakel eerst de standaard Car Link-app uit (pm disable-user com.syu.carlink), anders lezen beide apps hetzelfde kanaal. Het kanaal wordt zonder root geopend als het apparaat dat toestaat, anders via root. Kies Native, koppel de telefoon alleen met de module en exporteer het logboek als er geen verbinding komt.</string>
+    <string name="external_bt_zj_socket_transport">Verbinden via de ZJ-Bluetooth-socket</string>
+    <string name="external_bt_zj_socket_transport_description">Voor units waarvan de ZJ-Bluetooth-module de draadloze Android Auto-handshake via een lokale socket (/dev/socket/zj_bt_socket) afhandelt. De app gebruikt de socket vanzelf zodra die een verbinding accepteert. Zet dit alleen aan als je unit de socket heeft en de app die niet ziet.</string>
     <string name="external_bt_blink_refused_stock_enabled">Externe Bluetooth-module: de standaard Car Link-app is nog ingeschakeld. Schakel hem uit (pm disable-user com.syu.carlink) of zet dit transport uit.</string>
     <string name="external_bt_blink_refused_stock_running">Externe Bluetooth-module: de standaard Car Link-app is uitgeschakeld maar draait nog. Start het apparaat opnieuw op.</string>
     <string name="external_bt_blink_refused_root">Externe Bluetooth-module: voor het openen van het kanaal van de module is root nodig op dit apparaat, en roottoegang is geweigerd of niet beschikbaar.</string>
@@ -1416,6 +1455,7 @@
     <string name="home_favorites_full">Alle vier favorieten zijn bezet. Houd er een ingedrukt op het startscherm om hem te wijzigen.</string>
     <string name="home_choose_favorite_app">Kies een app of snelkoppeling</string>
     <string name="home_shortcut_badge">Snelkoppeling</string>
+    <string name="app_drawer_tab_shortcuts">Snelkoppelingen</string>
     <string name="home_show_favorite_apps">Favoriete apps op het startscherm</string>
     <string name="home_show_favorite_apps_description">Je favoriete apps onder de hoofdknop, als Open Headunit je launcher is</string>
     <string name="home_show_widgets">Widgets op het startscherm</string>

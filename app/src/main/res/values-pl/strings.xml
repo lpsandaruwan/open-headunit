@@ -27,6 +27,34 @@
     <string name="dpi">Gęstość pikseli (DPI)</string>
     <string name="mic_sample_rate">Częstotliwość próbkowania mikrofonu</string>
     <string name="keymap">Mapowanie klawiszy</string>
+    <string name="gestures">Gesty</string>
+    <string name="gestures_description">Skonfiguruj przesunięcia dwoma palcami i długie przytrzymanie.</string>
+    <string name="gesture_two_finger_down">Przesunięcie dwoma palcami w dół</string>
+    <string name="gesture_two_finger_long_press">Długie przytrzymanie dwoma palcami</string>
+    <string name="gesture_two_finger_left">Gest dwoma palcami z lewej</string>
+    <string name="gesture_two_finger_right">Gest dwoma palcami z prawej</string>
+    <string name="gesture_action_disabled">Wyłączone</string>
+    <string name="gesture_action_exit_dialog">Okno wyjścia</string>
+    <string name="gesture_action_toggle_fullscreen">Przełącz pełny ekran</string>
+    <string name="gesture_action_night_overlay">Nakładka nocna</string>
+    <string name="gestures_reset">Ustawienia gestów zresetowane</string>
+    <string name="night_overlay_dismiss">Dotknij, aby wrócić do projekcji</string>
+    <string name="night_overlay_meters">%1$d m</string>
+    <string name="night_overlay_kilometers">%1$.1f km</string>
+    <string name="night_overlay_navigation">%1$s · %2$s</string>
+    <string name="night_overlay_left">lewo</string>
+    <string name="night_overlay_right">prawo</string>
+    <string name="night_overlay_direction">%1$s · %2$s</string>
+    <string name="night_overlay_exit_number">Zjazd %1$d</string>
+    <string name="night_overlay_exit_angle">%1$d°</string>
+    <string name="night_overlay_eta_summary">ETA %1$s · %2$s · %3$s</string>
+    <string name="night_overlay_duration_minutes">%1$d min</string>
+    <string name="night_overlay_duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="night_overlay_current_road">Teraz: %1$s</string>
+    <string name="night_overlay_route">Trasa: %1$s</string>
+    <string name="night_overlay_lanes">Pasy: %1$s</string>
+    <string name="night_overlay_traffic_delay">Opóźnienie ruchu: +%1$s</string>
+    <string name="night_overlay_speed_value">%1$d km/h</string>
     <string name="night_mode">Tryb ciemny (Android Auto)</string>
     <string name="night_mode_threshold">Próg trybu nocnego</string>
     <string name="enter_threshold_value">Wprowadź wartość progu</string>
@@ -38,6 +66,16 @@
     <string name="threshold_brightness_hint">Tryb ciemny aktywuje się, gdy jasność ekranu jest poniżej tej wartości. Android raportuje jasność jako 0–255, ale rzeczywisty zakres może się różnić w zależności od urządzenia. Może być konieczne eksperymentowanie, aby znaleźć właściwy próg dla Twojego urządzenia.</string>
     <string name="current_light_reading">Aktualne światło: %d Lux</string>
     <string name="enable_fine_lux_control">Precyzyjna kontrola (0–100 Lux)</string>
+    <string name="car_signal_calibration_info_format">Bieżąca wartość car_mode: %1$d. Mapowanie: %2$s.</string>
+    <string name="car_signal_mapping_default">0 = Dzień, wartość różna od zera = Noc</string>
+    <string name="car_signal_mapping_inverted">0 = Noc, wartość różna od zera = Dzień</string>
+    <string name="car_signal_unavailable">Nie można teraz odczytać car_mode na tej jednostce.</string>
+    <string name="car_signal_headlights_question">Czy światła są teraz włączone?</string>
+    <string name="car_signal_calibration_title">Kalibracja ILL+</string>
+    <string name="car_signal_recalibrate">Kalibruj ponownie</string>
+    <string name="car_signal_headlights_on">Włączone</string>
+    <string name="car_signal_headlights_off">Wyłączone</string>
+    <string name="car_signal_calibration_saved">Kalibracja ILL+ została zapisana i zastosowana</string>
     <string name="night_mode_start">Czas rozpoczęcia trybu nocnego</string>
     <string name="night_mode_end">Czas zakończenia trybu nocnego</string>
 
@@ -103,6 +141,7 @@
     <string name="orientation_portrait">Pionowo (90°)</string>
     <string name="orientation_portrait_reverse">Pionowo odwrócone (270°)</string>
     <string name="enter_dpi_value">Wprowadź wartość DPI (0 dla auto)</string>
+    <string name="enter_audio_offset_value">Wprowadź wartość (0-250)</string>
     <string name="custom_margin">Własne marginesy</string>
     <string name="custom_margin_description">Ustaw własne marginesy ekranu (0 dla auto).</string>
     <string name="enter_custom_margins">Wprowadź marginesy (0 dla auto)</string>
@@ -521,8 +560,6 @@
     <string name="wireless_24ghz_warning">Uwaga: Bezprzewodowe Android Auto na urządzeniach 2,4 GHz może powodować opóźnienia, zacięcia i rozłączenia. W przypadku problemów sprawdź połączenie przez USB, aby potwierdzić, czy jest to ograniczenie sieciowe.</string>
     <string name="supported_nativeaa">Ulepszona obsługa łączności bezprzewodowej</string>
     <string name="supported_nativeaa_desc">Dobra wiadomość! Twoje urządzenie obsługuje tryb \"Native Wireless\", który zapewnia płynniejsze działanie Android Auto.\n\nAby go włączyć, musimy odświeżyć pamięć podręczną Bluetooth. Zrób to tak:\n1. Usuń istniejące sparowanie w telefonie\n2. Wybierz OK, aby zrestartować Bluetooth\n3. Sparuj telefon ponownie\n\nCzy chcesz teraz przełączyć się na tryb Native AA?</string>
-    <string name="fake_speed_title">Wyłącz blokadę wideo (Fake Speed)</string>
-    <string name="fake_speed_description">Zgłasza do telefonu stałą niską prędkość (0,5 m/s), aby zapobiec blokowaniu treści wideo podczas jazdy. Używaj ostrożnie.</string>
     <string name="wireless_mode_helper">Wireless Helper</string>
     <string name="wireless_mode_native">Natywny</string>
     <string name="wireless_mode_server">Headunit Server</string>
@@ -997,6 +1034,8 @@
     <string name="external_bt_module_controls_hint">Parowanie telefonu, priorytet połączeń i wybór telefonu kierowcy są obsługiwane przez zewnętrzny moduł Bluetooth.</string>
     <string name="external_bt_module_last_phone">Ostatni telefon połączony przez moduł</string>
     <string name="external_bt_blink_transport_description">Funkcja eksperymentalna. Przeznaczona dla urządzeń FYT, w których telefon paruje się do rozmów z osobnym modułem Bluetooth (np. „DUDUAUTO” w DUDUOS — jedynym dotychczas przetestowanym systemie). Nawiązywanie bezprzewodowego połączenia Android Auto odbywa się przez ten moduł zamiast przez systemowy Bluetooth Androida, a domyślnie obsługuje je fabryczna aplikacja Car Link. Po włączeniu tej opcji komunikację przejmuje Open Headunit, dzięki czemu połączenia głosowe pozostają w module i głośnikach auta.\n\nNajpierw wyłącz fabryczną aplikację Car Link (poleceniem: pm disable-user com.syu.carlink) — w przeciwnym razie obie aplikacje będą korzystać z tego samego kanału. Aplikacja otwiera kanał bez uprawnień roota (jeśli urządzenie na to pozwala) lub z uprawnieniami roota. Wybierz tryb Native, sparuj telefon wyłącznie z modułem i wyeksportuj logi, jeśli nie uda się połączyć.</string>
+    <string name="external_bt_zj_socket_transport">Połącz przez gniazdo Bluetooth ZJ</string>
+    <string name="external_bt_zj_socket_transport_description">Dla stacji, w których moduł Bluetooth ZJ przenosi bezprzewodowe uzgadnianie Android Auto przez lokalne gniazdo (/dev/socket/zj_bt_socket). Aplikacja używa go sama, gdy gniazdo przyjmuje połączenie. Włącz to tylko wtedy, gdy stacja ma to gniazdo, a aplikacja go nie widzi.</string>
     <string name="external_bt_blink_refused_stock_enabled">Zewnętrzny moduł Bluetooth: fabryczna aplikacja Car Link jest nadal aktywna. Wyłącz ją (pm disable-user com.syu.carlink) lub wyłącz tę metodę połączenia.</string>
     <string name="external_bt_blink_refused_stock_running">Zewnętrzny moduł Bluetooth: fabryczna aplikacja Car Link została wyłączona, ale nadal działa w tle. Uruchom ponownie urządzenie.</string>
     <string name="external_bt_blink_refused_root">Zewnętrzny moduł Bluetooth: otwarcie kanału modułu wymaga roota na tym urządzeniu, a dostęp root został odrzucony lub jest niedostępny.</string>
@@ -1417,6 +1456,7 @@
     <string name="home_favorites_full">Wszystkie cztery ulubione są zajęte. Przytrzymaj jedną na ekranie głównym, aby ją zmienić.</string>
     <string name="home_choose_favorite_app">Wybierz aplikację lub skrót</string>
     <string name="home_shortcut_badge">Skrót</string>
+    <string name="app_drawer_tab_shortcuts">Skróty</string>
     <string name="home_show_favorite_apps">Ulubione aplikacje na ekranie głównym</string>
     <string name="home_show_favorite_apps_description">Twoje ulubione aplikacje pod głównym przyciskiem, gdy Open Headunit jest Twoim launcherem</string>
     <string name="home_show_widgets">Widżety na ekranie głównym</string>

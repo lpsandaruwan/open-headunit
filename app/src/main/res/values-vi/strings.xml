@@ -27,6 +27,34 @@
     <string name="dpi">Mật độ điểm ảnh (DPI)</string>
     <string name="mic_sample_rate">Tần số lấy mẫu micro</string>
     <string name="keymap">Bản đồ phím</string>
+    <string name="gestures">Cử chỉ</string>
+    <string name="gestures_description">Cấu hình vuốt hai ngón và nhấn giữ lâu.</string>
+    <string name="gesture_two_finger_down">Vuốt hai ngón xuống</string>
+    <string name="gesture_two_finger_long_press">Nhấn giữ hai ngón</string>
+    <string name="gesture_two_finger_left">Cử chỉ hai ngón từ bên trái</string>
+    <string name="gesture_two_finger_right">Cử chỉ hai ngón từ bên phải</string>
+    <string name="gesture_action_disabled">Đã tắt</string>
+    <string name="gesture_action_exit_dialog">Hộp thoại thoát</string>
+    <string name="gesture_action_toggle_fullscreen">Chuyển đổi toàn màn hình</string>
+    <string name="gesture_action_night_overlay">Lớp phủ ban đêm</string>
+    <string name="gestures_reset">Đã đặt lại cài đặt cử chỉ</string>
+    <string name="night_overlay_dismiss">Chạm để quay lại chế độ chiếu</string>
+    <string name="night_overlay_meters">%1$d m</string>
+    <string name="night_overlay_kilometers">%1$.1f km</string>
+    <string name="night_overlay_navigation">%1$s · %2$s</string>
+    <string name="night_overlay_left">trái</string>
+    <string name="night_overlay_right">phải</string>
+    <string name="night_overlay_direction">%1$s · %2$s</string>
+    <string name="night_overlay_exit_number">Lối ra %1$d</string>
+    <string name="night_overlay_exit_angle">%1$d°</string>
+    <string name="night_overlay_eta_summary">Đến nơi %1$s · %2$s · %3$s</string>
+    <string name="night_overlay_duration_minutes">%1$d phút</string>
+    <string name="night_overlay_duration_hours_minutes">%1$d giờ %2$d phút</string>
+    <string name="night_overlay_current_road">Hiện tại: %1$s</string>
+    <string name="night_overlay_route">Lộ trình: %1$s</string>
+    <string name="night_overlay_lanes">Làn đường: %1$s</string>
+    <string name="night_overlay_traffic_delay">Trễ do giao thông: +%1$s</string>
+    <string name="night_overlay_speed_value">%1$d km/h</string>
     <string name="night_mode">Chế độ tối (Android Auto)</string>
     <string name="night_mode_threshold">Ngưỡng chế độ tối</string>
     <string name="enter_threshold_value">Nhập giá trị ngưỡng</string>
@@ -39,6 +67,16 @@
     <string name="current_light_reading">Ánh sáng hiện tại: %d Lux</string>
     <string name="current_brightness_reading">Độ sáng hiện tại: %d / 255</string>
     <string name="enable_fine_lux_control">Điều chỉnh tinh (0–100 Lux)</string>
+    <string name="car_signal_calibration_info_format">car_mode hiện tại: %1$d. Ánh xạ: %2$s.</string>
+    <string name="car_signal_mapping_default">0 = Ban ngày, khác 0 = Ban đêm</string>
+    <string name="car_signal_mapping_inverted">0 = Ban đêm, khác 0 = Ban ngày</string>
+    <string name="car_signal_unavailable">Không thể đọc car_mode trên đầu phát này lúc này.</string>
+    <string name="car_signal_headlights_question">Đèn pha hiện đang bật chứ?</string>
+    <string name="car_signal_calibration_title">Hiệu chỉnh ILL+</string>
+    <string name="car_signal_recalibrate">Hiệu chỉnh lại</string>
+    <string name="car_signal_headlights_on">Bật</string>
+    <string name="car_signal_headlights_off">Tắt</string>
+    <string name="car_signal_calibration_saved">Hiệu chỉnh ILL+ đã được lưu và áp dụng</string>
     <string name="night_mode_start">Giờ bắt đầu chế độ tối</string>
     <string name="night_mode_end">Giờ kết thúc chế độ tối</string>
 
@@ -108,6 +146,7 @@
     <string name="orientation_portrait">Dọc (90°)</string>
     <string name="orientation_portrait_reverse">Dọc ngược (270°)</string>
     <string name="enter_dpi_value">Nhập DPI (0 = tự động)</string>
+    <string name="enter_audio_offset_value">Nhập giá trị (0-250)</string>
     <string name="custom_margin">Lề tuỳ chỉnh</string>
     <string name="custom_margin_description">Đặt lề hiển thị tuỳ chỉnh (0 = tự động).</string>
     <string name="enter_custom_margins">Nhập lề tuỳ chỉnh (0 = tự động)</string>
@@ -541,8 +580,6 @@
     <string name="wait_for_wifi_description">Khi khởi động, chờ WiFi kết nối trước khi bắt đầu WiFi Direct. Bật nếu headunit cần vài giây để kết nối WiFi sau khi bật nguồn.</string>
     <string name="wait_for_wifi_timeout">Thời gian chờ WiFi</string>
     <string name="wireless_24ghz_warning">Lưu ý: Android Auto không dây trên thiết bị 2.4GHz có thể gây giật, lag và ngắt kết nối. Nếu gặp vấn đề, vui lòng kiểm tra qua USB để xác nhận có phải giới hạn mạng không.</string>
-    <string name="fake_speed_title">Tắt khoá video (Giả tốc độ)</string>
-    <string name="fake_speed_description">Báo cho điện thoại tốc độ thấp không đổi (0.5 m/s) để không bị chặn nội dung video khi lái. Dùng cẩn thận.</string>
     <string name="wireless_mode_helper">Wireless Helper</string>
     <string name="wireless_mode_native">Native</string>
     <string name="wireless_mode_server">Headunit Server</string>
@@ -992,6 +1029,8 @@
     <string name="external_bt_module_controls_hint">Mô-đun Bluetooth ngoài quản lý việc ghép nối điện thoại, mức ưu tiên kết nối và lựa chọn trình điều khiển.</string>
     <string name="external_bt_module_last_phone">Điện thoại kết nối gần nhất qua mô-đun</string>
     <string name="external_bt_blink_transport_description">Thử nghiệm. Dành cho thiết bị FYT mà điện thoại ghép nối để gọi với một mô-đun Bluetooth riêng, như \"DUDUAUTO\" trên DUDUOS, ROM duy nhất đã được thử đến nay. Mô-đun này, không phải Bluetooth của thiết bị, truyền bắt tay Android Auto không dây, và ứng dụng Car Link gốc thường trả lời nó. Khi bật tùy chọn này, ứng dụng này sẽ trả lời thay, nên cuộc gọi vẫn ở trên mô-đun và loa xe.\n\nHãy tắt ứng dụng Car Link gốc trước (pm disable-user com.syu.carlink), nếu không cả hai ứng dụng sẽ đọc cùng một kênh. Kênh được mở không cần root nếu thiết bị cho phép, nếu không thì mở qua root. Chọn Native, chỉ ghép nối điện thoại với mô-đun, và xuất nhật ký nếu không kết nối được.</string>
+    <string name="external_bt_zj_socket_transport">Kết nối qua socket Bluetooth ZJ</string>
+    <string name="external_bt_zj_socket_transport_description">Dành cho các thiết bị có mô-đun Bluetooth ZJ truyền bắt tay Android Auto không dây qua một socket cục bộ (/dev/socket/zj_bt_socket). Ứng dụng tự dùng socket này khi nó chấp nhận kết nối. Chỉ bật khi thiết bị của bạn có socket mà ứng dụng không nhận ra.</string>
     <string name="external_bt_blink_refused_stock_enabled">Mô-đun Bluetooth ngoài: ứng dụng Car Link gốc vẫn đang bật. Hãy tắt nó (pm disable-user com.syu.carlink) hoặc tắt phương thức truyền này.</string>
     <string name="external_bt_blink_refused_stock_running">Mô-đun Bluetooth ngoài: ứng dụng Car Link gốc đã tắt nhưng vẫn đang chạy. Hãy khởi động lại thiết bị.</string>
     <string name="external_bt_blink_refused_root">Mô-đun Bluetooth ngoài: mở kênh của mô-đun cần quyền root trên thiết bị này, nhưng quyền root bị từ chối hoặc không có.</string>
@@ -1412,6 +1451,7 @@
     <string name="home_favorites_full">Đã đủ bốn ứng dụng yêu thích. Nhấn giữ một ứng dụng trên màn hình chính để đổi.</string>
     <string name="home_choose_favorite_app">Chọn ứng dụng hoặc lối tắt</string>
     <string name="home_shortcut_badge">Lối tắt</string>
+    <string name="app_drawer_tab_shortcuts">Lối tắt</string>
     <string name="home_show_favorite_apps">Ứng dụng yêu thích trên màn hình chính</string>
     <string name="home_show_favorite_apps_description">Ứng dụng yêu thích của bạn dưới nút chính, khi Open Headunit là trình khởi chạy của bạn</string>
     <string name="home_show_widgets">Tiện ích trên màn hình chính</string>

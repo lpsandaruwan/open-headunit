@@ -49,6 +49,7 @@ enum class WifiLauncherStopSequence { LAST, BEFORE_HOTSPOT_DISABLE }
 enum class HotspotExitAction { NONE, DISABLE, WARN_LEFT_UP }
 object UserExitHotspotPolicy { fun onUserExit(a: Any,b: Any,c: Any,d: Any,e: Any) = HotspotExitAction.NONE }
 object HotspotManager { fun restart(s: Service) = true }
+object Esp32RelaySession { fun hasSavedEsp32Relay(context: Any) = false; fun notifyProjection(up: Boolean) {} }
 class Settings {
     val wifiConnectionMode=WifiLauncherMode.NATIVE; val helperConnectionStrategy=0; val nativeApStrategy=0
     val autoEnableHotspot=false; var hotspotTeardownProvenUnsafe=false
@@ -82,6 +83,8 @@ object App { fun provide(s: Service)=s }
 class VideoDecoder { var stops=0; fun stop(reason: String) { stops++ } }
 class SelfManager { var isActive=false }
 class Service {
+    var hctParks=0
+    private fun parkRetainedHct(onlyCompleted: Boolean) { hctParks++ }
     val main=Queued()
     val serviceScope=CoroutineScope(SupervisorJob()+main)
     val commManager=CommManager()
@@ -121,7 +124,7 @@ fun main() {
         val ended=commManager.connectionState.value as CommManager.ConnectionState.Disconnected
         wifiLauncherManager.noteRearm()
         notifyEnd(ended); commManager.gate.complete(Unit); main.drain()
-        check(gpsStops==1 && wifiReleases==1)
+        check(gpsStops==1 && wifiReleases==1 && hctParks==0)
         check(vpnStops==1 && deadlineCancels==1 && reconnects==0)
         check(!userExitedAA && userExitCooldownUntil==0L && wifiLauncherManager.stops==0)
         serviceScope.cancel()
@@ -151,7 +154,7 @@ fun main() {
         commManager.connectionState.value=ended
         exitTeardownState=ended; exitTeardownDone=CompletableDeferred()
         notifyEnd(ended); commManager.gate.complete(Unit); main.drain()
-        check(wifiLauncherManager.stops==1 && gpsStops==1 && userExitedAA)
+        check(wifiLauncherManager.stops==1 && gpsStops==1 && userExitedAA && hctParks==1)
         check(exitTeardownDone!!.isCompleted)
         serviceScope.cancel()
     }
