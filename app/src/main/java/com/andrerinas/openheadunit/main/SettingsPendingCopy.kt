@@ -46,6 +46,7 @@ class SettingsPendingCopy {
     var audioMatchingMode: com.andrerinas.openheadunit.decoder.audio.AudioTimeCorrectionMode? = null
     var useLibusb: Boolean? = null
     var experimentalAsyncUsbReads: Boolean? = null
+    var listenForUsbDevices: Boolean? = null
     var audioQueueCapacity: Int? = null
     var showToastMessages: Boolean? = null
     var screenOrientation: Settings.ScreenOrientation? = null
@@ -69,6 +70,8 @@ class SettingsPendingCopy {
     var nativeDriverSelectionMode: NativeDriverSelectionPolicy.Mode? = null
     var nativeDriverSelectionTimeout: Int? = null
     var nativePreferredDeviceMac: String? = null
+    var nativePokeBtMacs: Set<String>? = null
+    var nativePokeAllPaired: Boolean? = null
     var wifiDirectBand: Int? = null
     var wifiDirectStableIdentity: Boolean? = null
     var wifiDirectGroupIdentity: StoredP2pIdentity? = null
@@ -137,6 +140,7 @@ class SettingsPendingCopy {
         audioMatchingMode = settings.audioMatchingMode
         useLibusb = settings.useLibusb
         experimentalAsyncUsbReads = settings.experimentalAsyncUsbReads
+        listenForUsbDevices = settings.listenForUsbDevices
         audioQueueCapacity = settings.audioQueueCapacity
         showToastMessages = settings.showToastMessages
         screenOrientation = settings.screenOrientation
@@ -160,6 +164,8 @@ class SettingsPendingCopy {
         nativeDriverSelectionMode = settings.nativeDriverSelectionMode
         nativeDriverSelectionTimeout = settings.nativeDriverSelectionTimeoutSec
         nativePreferredDeviceMac = settings.nativePreferredDeviceMac
+        nativePokeBtMacs = settings.nativePokeBtMacs
+        nativePokeAllPaired = settings.nativePokeAllPairedDevices
         wifiDirectBand = settings.wifiDirectBand
         wifiDirectStableIdentity = settings.wifiDirectStableIdentity
         wifiDirectGroupIdentity = settings.wifiDirectGroupIdentity
@@ -229,6 +235,7 @@ class SettingsPendingCopy {
         audioMatchingMode != settings.audioMatchingMode ||
         useLibusb != settings.useLibusb ||
         experimentalAsyncUsbReads != settings.experimentalAsyncUsbReads ||
+        listenForUsbDevices != settings.listenForUsbDevices ||
         audioQueueCapacity != settings.audioQueueCapacity ||
         showToastMessages != settings.showToastMessages ||
         screenOrientation != settings.screenOrientation ||
@@ -252,6 +259,8 @@ class SettingsPendingCopy {
         nativeDriverSelectionMode != settings.nativeDriverSelectionMode ||
         nativeDriverSelectionTimeout != settings.nativeDriverSelectionTimeoutSec ||
         nativePreferredDeviceMac != settings.nativePreferredDeviceMac ||
+        nativePokeBtMacs != settings.nativePokeBtMacs ||
+        nativePokeAllPaired != settings.nativePokeAllPairedDevices ||
         wifiDirectBand != settings.wifiDirectBand ||
         wifiDirectStableIdentity != settings.wifiDirectStableIdentity ||
         wifiDirectGroupIdentity != settings.wifiDirectGroupIdentity ||

@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.multidex.MultiDex
 import com.andrerinas.openheadunit.main.BackgroundNotification
 import com.andrerinas.openheadunit.aap.AapNavigation
+import com.andrerinas.openheadunit.connection.usb.UsbPermissionAsks
 import com.andrerinas.openheadunit.ssl.ConscryptInitializer
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.AppThemeManager
@@ -68,6 +69,12 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
         }
 
 
+
+        try {
+            UsbPermissionAsks.observeDetaches(this)
+        } catch (e: Exception) {
+            AppLog.w("App", "Failed to register the USB detach observer", e)
+        }
 
         // Enable vector drawable support on older Android versions
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
@@ -149,6 +156,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
         // can read them during locked boot (before user unlock)
         Settings.syncAutoStartOnBootToDeviceStorage(this, settings.autoStartOnBoot)
         Settings.syncAutoStartOnUsbToDeviceStorage(this, settings.autoStartOnUsb)
+        Settings.syncUsbConnectOnPlugInToDeviceStorage(this, settings.usbConnectOnPlugIn)
         Settings.syncAutoStartOnWifiToDeviceStorage(this, settings.autoStartOnWifi)
         Settings.syncAutoStartWifiSsidToDeviceStorage(this, settings.autoStartWifiSsid)
         Settings.syncAutoStartBtMacsToDeviceStorage(this, settings.autoStartBluetoothDeviceMacs)

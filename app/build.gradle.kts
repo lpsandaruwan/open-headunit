@@ -106,9 +106,9 @@ android {
         minSdk = 16
         if (embedOablLink) minSdk = 26
         targetSdk = 36
-        versionCode = if (embedOablLink) 125 else 121
-        versionName = "4.0.0-beta1"
-        if (embedOablLink) versionNameSuffix = "-oabl-link-regen1"
+        versionCode = if (embedOablLink) 126 else 122
+        versionName = "4.0.0-beta2"
+        if (embedOablLink) versionNameSuffix = "-oabl-link-regen2"
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
