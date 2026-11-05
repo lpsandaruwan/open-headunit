@@ -1285,7 +1285,16 @@ class SettingsFragment : Fragment() {
                                 updateSettingsList()
                             } else {
                                 vpnConsentRequested = true
-                                vpnConsentLauncher.launch(consent)
+                                try {
+                                    vpnConsentLauncher.launch(consent)
+                                } catch (e: ActivityNotFoundException) {
+                                    // No consent dialog on this ROM, so the switch stays off.
+                                    AppLog.w("VPN consent dialog is missing on this device.")
+                                    vpnConsentRequested = false
+                                    pendingKeepDummyVpnDuringSession = false
+                                    checkChanges()
+                                    updateSettingsList()
+                                }
                             }
                         }
                     }

@@ -1,6 +1,7 @@
 package com.andrerinas.openheadunit.main
 
 import com.andrerinas.openheadunit.utils.bluetooth.BluetoothPeerDiscovery
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.annotation.SuppressLint
@@ -1646,8 +1647,16 @@ class HomeFragment : Fragment() {
             AppLog.i("Device is offline. Preparing Dummy VPN for Self Mode.")
             val vpnIntent = VpnControl.consentIntent(requireContext())
             if (vpnIntent != null) {
-                vpnPermissionLauncher.launch(vpnIntent)
-                return
+                try {
+                    vpnPermissionLauncher.launch(vpnIntent)
+                    return
+                } catch (e: ActivityNotFoundException) {
+                    // Some head unit ROMs leave out Android's VPN consent dialog, so no app can get
+                    // VPN permission there. Go on without the dummy VPN instead of crashing Home.
+                    AppLog.w("VPN consent dialog is missing on this device. Self Mode may fail offline.")
+                    startSelfModeInternal(needsDummyVpn = false)
+                    return
+                }
             } else {
                 AppLog.i("VPN permission already granted. Self Mode will prepare it after launch admission.")
             }
