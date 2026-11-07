@@ -3,6 +3,7 @@ package com.andrerinas.openheadunit.connection.usb
 import android.content.Context
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
+import android.os.Build
 import android.os.SystemClock
 import android.widget.Toast
 import com.andrerinas.openheadunit.App
@@ -46,18 +47,22 @@ class UsbLauncherListener(private val manager: UsbLauncherManager) : UsbReceiver
             // If nothing has connected after a delay, the service checks too; the permission
             // policy still defers a device to Android when Android owns its ask.
             val deviceName = UsbDeviceCompat(device).uniqueName
+            // With no handler on the ROM no activity is coming, so there's nothing to wait for.
+            val wait = if (UsbPermissionAskPolicy.androidOffersNoHandler(Build.BOARD, Build.MODEL)) 0L else ATTACH_FALLBACK_DELAY_MS
 
-            AppLog.i("Normal USB device attached: $deviceName. Will check auto-connect in ${ATTACH_FALLBACK_DELAY_MS}ms...")
+            AppLog.i("Normal USB device attached: $deviceName. Will check auto-connect in ${wait}ms...")
 
             service.launchMainActivityIfNeeded("USB normal attach ($deviceName)", defersToAndroid(device))
             service.serviceScope.launch {
-                delay(ATTACH_FALLBACK_DELAY_MS)
+                delay(wait)
                 // The manager retains this scan if its own AOA switch is still running.
                 // An Activity-owned switch keeps its separate handoff guard.
                 if (!commManager.isConnected && !manager.isActivitySwitchInFlight()) {
                     AppLog.i("UsbAttachedActivity didn't handle $deviceName. Trying from service...")
                     manager.checkAlreadyConnected(force = true, settingsRestart = manager.pendingSettingsRestart(),
                         trigger = UsbPlugInPolicy.Trigger.PLUG_IN)
+                } else {
+                    AppLog.i("Not checking $deviceName from the service: connected=${commManager.isConnected} activitySwitch=${manager.isActivitySwitchInFlight()}")
                 }
             }
         }

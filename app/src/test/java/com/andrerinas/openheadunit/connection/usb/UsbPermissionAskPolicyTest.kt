@@ -25,9 +25,10 @@ class UsbPermissionAskPolicyTest {
         ownSwitchAgeMs: Long? = null,
         alreadyAsked: Boolean = false,
         source: Source = Source.AUTOMATIC,
+        androidOffersNoHandler: Boolean = false,
     ) = Inputs(
         accessory, mtp, filterMatches, activityEnabled, automotive, sdkInt,
-        listenForUsb, attachAgeMs, ownSwitchAgeMs, alreadyAsked, source,
+        listenForUsb, attachAgeMs, ownSwitchAgeMs, alreadyAsked, source, androidOffersNoHandler,
     )
 
     private fun decide(i: Inputs) = UsbPermissionAskPolicy.decide(i).action
@@ -221,5 +222,34 @@ class UsbPermissionAskPolicyTest {
         }
         assertEquals(Action.ASK, decide(inputs(alreadyAsked = true, source = Source.USER)))
         assertEquals(Action.ASKED, decide(inputs(alreadyAsked = true, source = Source.RECOVERY)))
+    }
+
+    @Test
+    fun `a ROM with no USB handler asks at once for both identities`() {
+        assertEquals(Action.ASK, decide(inputs(androidOffersNoHandler = true)))
+        assertEquals(Action.ASK, decide(inputs(accessory = true, androidOffersNoHandler = true)))
+        assertEquals(Action.ASK, decide(inputs(mtp = true, androidOffersNoHandler = true)))
+    }
+
+    @Test
+    fun `a ROM with no USB handler neither hides the app nor asks for the USB button`() {
+        val i = inputs(androidOffersNoHandler = true)
+        assertFalse(UsbPermissionAskPolicy.raiseDefersToAndroid(false, i))
+        assertFalse(UsbPermissionAskPolicy.hintsUserAsk(false, UsbPermissionAskPolicy.decide(i).action))
+    }
+
+    @Test
+    fun `a ROM with no USB handler still asks once and still honours listen off`() {
+        assertEquals(Action.ASKED, decide(inputs(androidOffersNoHandler = true, alreadyAsked = true)))
+        assertEquals(Action.HOLD, decide(inputs(androidOffersNoHandler = true, listenForUsb = false)))
+    }
+
+    @Test
+    fun `only the Dongfeng head unit counts as having no USB handler`() {
+        assertTrue(UsbPermissionAskPolicy.androidOffersNoHandler("trinket", "BOX"))
+        assertTrue(UsbPermissionAskPolicy.androidOffersNoHandler("TRINKET", "box"))
+        assertFalse("the Fire tablet", UsbPermissionAskPolicy.androidOffersNoHandler("mt8183", "KFTRWI"))
+        assertFalse(UsbPermissionAskPolicy.androidOffersNoHandler("trinket", "Pixel"))
+        assertFalse(UsbPermissionAskPolicy.androidOffersNoHandler(null, null))
     }
 }

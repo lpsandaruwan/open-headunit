@@ -183,6 +183,7 @@ class UsbDeviceCompat(val wrappedDevice: UsbDevice) {
                 false
             }
             return UsbPermissionAskPolicy.Inputs(
+                androidOffersNoHandler = UsbPermissionAskPolicy.androidOffersNoHandler(Build.BOARD, Build.MODEL),
                 accessory = isInAccessoryMode(device),
                 mtp = UsbPermissionAskPolicy.isMtp(described),
                 filterMatches = UsbManifestFilter.matches(described),

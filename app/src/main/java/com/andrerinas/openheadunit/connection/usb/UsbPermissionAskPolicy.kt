@@ -30,6 +30,7 @@ object UsbPermissionAskPolicy {
         val ownSwitchAgeMs: Long?,
         val alreadyAsked: Boolean,
         val source: Source,
+        val androidOffersNoHandler: Boolean = false,
     )
 
     class Decision(private val inputs: Inputs, val action: Action) {
@@ -40,6 +41,7 @@ object UsbPermissionAskPolicy {
             " activity=" + onOff(inputs.activityEnabled) +
             " listen=" + onOff(inputs.listenForUsb) +
             " attach=" + (inputs.attachAgeMs?.let { "${it}ms" } ?: "none") +
+            (if (inputs.androidOffersNoHandler) " handler=none" else "") +
             " source=" + inputs.source.name.lowercase(java.util.Locale.US) +
             " action=" + action.name.lowercase(java.util.Locale.US)
 
@@ -54,10 +56,20 @@ object UsbPermissionAskPolicy {
     }
 
     /**
+     * The Dongfeng head unit's ROM names a USB handler package it doesn't have, so a plug-in starts
+     * no chooser and no activity, and nothing is granted until the app asks. Its answer comes with
+     * no dialog, so asking can't stack on anything. A deferred ask here waits for a press of USB,
+     * once for each identity the phone has.
+     */
+    fun androidOffersNoHandler(board: String?, model: String?): Boolean =
+        board.equals("trinket", ignoreCase = true) && model.equals("BOX", ignoreCase = true)
+
+    /**
      * Android owns the ask: it shows its chooser or starts another app's saved default, and no
      * public API says which. From API 24 an MTP device gets a notification instead, unless on a car.
      */
     fun defersToAndroid(inputs: Inputs): Boolean {
+        if (inputs.androidOffersNoHandler) return false
         val mtpNotified = inputs.sdkInt >= 24 && inputs.mtp && !inputs.automotive
         return inputs.activityEnabled && inputs.filterMatches && !mtpNotified
     }
