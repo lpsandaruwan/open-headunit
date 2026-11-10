@@ -8,6 +8,7 @@ plugins {
 }
 
 val embedOablLink = providers.gradleProperty("headunitOablLink").orNull == "true"
+val dongfengVysor = providers.gradleProperty("headunitVysor").orNull == "true"
 
 android {
     compileSdk = 36
@@ -101,14 +102,19 @@ android {
         // name its cert allowlist exempts. Pass -PheadunitVysor=true to install there; the code
         // package and namespace stay openheadunit, only the installed id changes.
         applicationId =
-            if (project.findProperty("headunitVysor") == "true") "com.koushikdutta.vysor"
+            if (dongfengVysor) "com.koushikdutta.vysor"
             else "com.andrerinas.headunitrevived"
         minSdk = 16
         if (embedOablLink) minSdk = 26
         targetSdk = 36
-        versionCode = if (embedOablLink) 134 else 122
+        versionCode = when {
+            embedOablLink -> 134
+            dongfengVysor -> 135
+            else -> 122
+        }
         versionName = "4.0.0-beta2"
         if (embedOablLink) versionNameSuffix = "-oabl-link-bt8"
+        else if (dongfengVysor) versionNameSuffix = "-dongfeng-android8"
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
