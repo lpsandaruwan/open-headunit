@@ -844,6 +844,7 @@
         <item>ชุดหูฟังบลูทูธ (SCO)</item>
     </string-array>
     <string name="mic_echo_canceler">การตัดเสียงสะท้อน (AEC)</string>
+    <string name="mic_gain_help">เพิ่มระดับเสียงไมโครโฟนของเฮดยูนิตก่อนส่งไปยังโทรศัพท์ พร้อมลิมิตเตอร์แบบนุ่มนวลเพื่อไม่ให้เสียงดังแตก ลอง +6 dB หากปลายสายบอกว่าเสียงเบา แตะเพื่อสลับระหว่าง 0, +3, +6, +9 และ +12 dB</string>
     <string name="mic_echo_canceler_description">พยายามตัดเสียงสะท้อนออกจากไมโครโฟน ปิดหากไม่มีเสียงหรือเสียงเพี้ยน</string>
     <string name="mic_echo_canceler_summary">ลดเสียงสะท้อนจากไมโครโฟน ปิดเมื่อเงียบหรือเสียงเพี้ยน</string>
     <string name="mic_noise_suppressor">การระงับเสียงรบกวน (NS)</string>

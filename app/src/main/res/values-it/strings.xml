@@ -760,6 +760,7 @@
     <string name="microphone_settings_description">Configura l\'ingresso del microfono e l\'elaborazione audio.</string>
     <string name="mic_wire_format_info">Android Auto riceve sempre il microfono a 16000 Hz, 16 bit, mono. Rifiuta qualsiasi altro formato, quindi queste impostazioni cambiano ciò che fa l\'hardware, non ciò che viene inviato al telefono.</string>
     <string name="mic_echo_canceler">Cancellazione dell\'eco (AEC)</string>
+    <string name="mic_gain_help">Alza il livello del microfono dell\'autoradio prima di inviarlo al telefono, con un limitatore morbido per evitare distorsioni. Prova +6 dB se chi ascolta dice che parli piano. Tocca per scorrere 0, +3, +6, +9 e +12 dB.</string>
     <string name="mic_echo_canceler_description">Prova a rimuovere l\'eco dal microfono. Disattiva se senti silenzio o distorsione.</string>
     <string name="mic_echo_canceler_summary">Rimuove l\'eco dal microfono. Disattivalo se senti silenzio o distorsione.</string>
     <string name="mic_noise_suppressor">Soppressione del rumore (NS)</string>

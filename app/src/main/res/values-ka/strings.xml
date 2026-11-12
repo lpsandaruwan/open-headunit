@@ -444,6 +444,7 @@
         <item>Bluetooth ყურსასმენი (SCO)</item>
     </string-array>
     <string name="mic_echo_canceler">ექოს ჩახშობა (AEC)</string>
+    <string name="mic_gain_help">ტელეფონზე გაგზავნამდე ზრდის მთავარი ბლოკის მიკროფონის დონეს რბილი შემზღუდველით, რომ ხმამაღალი საუბარი არ დაიმახინჯოს. სცადეთ +6 dB, თუ თანამოსაუბრე ამბობს, რომ ჩუმად ისმით. შეეხეთ 0, +3, +6, +9 და +12 dB-ს შორის გადასართავად.</string>
     <string name="mic_echo_canceler_description">ცდილობს მიკროფონიდან ექოს მოცილებას. გამორთეთ, თუ შეამჩნევთ ხმის გაქრობას ან დამახინჯებას.</string>
     <string name="mic_echo_canceler_summary">შლის ექოს მიკროფონიდან. გამორთეთ, თუ სიჩუმეა ან ხმა დამახინჯებულია.</string>
     <string name="mic_noise_suppressor">ხმაურის ფილტრაცია (NS)</string>

@@ -727,6 +727,7 @@
     <string name="microphone_settings_description">Mikrofon girişini ve ses işlemeyi yapılandırın.</string>
     <string name="mic_wire_format_info">Android Auto mikrofonu her zaman 16000 Hz, 16 bit, mono olarak alır. Başka her şeyi reddeder, bu nedenle bu ayarlar donanımın ne yaptığını değiştirir, telefona ne gönderildiğini değil.</string>
     <string name="mic_echo_canceler">Yankı giderme (AEC)</string>
+    <string name="mic_gain_help">Telefona göndermeden önce ana ünitenin mikrofonunu yükseltir; yüksek ses bozulmasın diye yumuşak bir sınırlayıcı kullanır. Karşı taraf sesinizin kısık olduğunu söylüyorsa +6 dB deneyin. 0, +3, +6, +9 ve +12 dB arasında geçmek için dokunun.</string>
     <string name="mic_echo_canceler_description">Mikrofondaki yankıyı gidermeye çalışır. Sessizlik veya bozulma yaşıyorsanız bunu devre dışı bırakın.</string>
     <string name="mic_echo_canceler_summary">Mikrofondaki yankıyı giderir. Sessizlik veya bozulma olursa kapatın.</string>
     <string name="mic_noise_suppressor">Gürültü bastırma (NS)</string>

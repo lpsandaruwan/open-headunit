@@ -431,6 +431,7 @@
         <item>Tai nghe Bluetooth (SCO)</item>
     </string-array>
     <string name="mic_echo_canceler">Khử tiếng vang (AEC)</string>
+    <string name="mic_gain_help">Tăng mức micro của đầu xe trước khi gửi sang điện thoại, kèm bộ giới hạn mềm để giọng to không bị rè. Hãy thử +6 dB nếu người nghe bảo giọng bạn nhỏ. Chạm để chuyển giữa 0, +3, +6, +9 và +12 dB.</string>
     <string name="mic_echo_canceler_description">Cố gắng loại bỏ tiếng vang ở micro. Tắt nếu bị im lặng hoặc méo tiếng.</string>
     <string name="mic_echo_canceler_summary">Loại bỏ tiếng vọng khỏi micrô. Hãy tắt nếu bị im lặng hoặc méo tiếng.</string>
     <string name="mic_noise_suppressor">Khử nhiễu (NS)</string>

@@ -938,6 +938,9 @@
         <item>Voice Communication (Echo + noise cancelled)</item>
         <item>Bluetooth Headset (SCO)</item>
     </string-array>
+    <string name="mic_gain">Microphone boost</string>
+    <string name="mic_gain_off">Off</string>
+    <string name="mic_gain_help">Raises the head unit\'s microphone before it goes to the phone, with a soft limit so loud speech does not clip. Try +6 dB if the person you call says you are quiet. The Android Auto log prints the level every 10 seconds. Tap to step through 0, +3, +6, +9 and +12 dB.</string>
     <string name="mic_echo_canceler">Echo cancellation (AEC)</string>
     <string name="mic_echo_canceler_description">Attempts to remove echo from the microphone. Disable if you experience silence or distortion.</string>
     <string name="mic_echo_canceler_summary">Remove echo from the microphone. Turn off for silence or distortion.</string>

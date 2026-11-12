@@ -482,6 +482,7 @@
         <item>Bluetooth-Headset (SCO)</item>
     </string-array>
     <string name="mic_echo_canceler">Echounterdrückung (AEC)</string>
+    <string name="mic_gain_help">Verstärkt das Mikrofon des Steuergeräts vor der Übertragung zum Telefon, mit weichem Limiter gegen Übersteuern. Versuchen Sie +6 dB, wenn Anrufer sagen, Sie seien leise. Tippen schaltet durch 0, +3, +6, +9 und +12 dB.</string>
     <string name="mic_echo_canceler_description">Versucht, Echo aus dem Mikrofon zu entfernen. Deaktivieren bei Stille oder Verzerrung.</string>
     <string name="mic_echo_canceler_summary">Echo aus dem Mikrofonsignal entfernen. Bei Stille oder Verzerrung ausschalten.</string>
     <string name="mic_noise_suppressor">Rauschunterdrückung (NS)</string>

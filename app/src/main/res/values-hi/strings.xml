@@ -843,6 +843,7 @@
         <item>ब्लूटूथ हेडसेट (SCO)</item>
     </string-array>
     <string name="mic_echo_canceler">इको कैंसलेशन (AEC)</string>
+    <string name="mic_gain_help">फ़ोन को भेजने से पहले हेड यूनिट के माइक्रोफ़ोन की आवाज़ बढ़ाता है, और तेज़ आवाज़ न बिगड़े इसके लिए नरम लिमिटर लगाता है। यदि सामने वाला कहे कि आवाज़ धीमी है तो +6 dB आज़माएँ। 0, +3, +6, +9 और +12 dB के बीच बदलने के लिए टैप करें।</string>
     <string name="mic_echo_canceler_description">माइक्रोफ़ोन से इको हटाने की कोशिश करता है। आवाज़ न आए या बिगड़ी आए तो इसे बंद करें।</string>
     <string name="mic_echo_canceler_summary">माइक्रोफ़ोन से गूँज हटाता है। आवाज़ बिल्कुल न आए या बिगड़ी आए, तो इसे बंद करें।</string>
     <string name="mic_noise_suppressor">नॉइज़ सप्रेशन (NS)</string>

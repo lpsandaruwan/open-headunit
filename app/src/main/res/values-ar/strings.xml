@@ -753,6 +753,7 @@
     <string name="microphone_settings_description">تكوين مدخل الميكروفون ومعالجة الصوت.</string>
     <string name="mic_wire_format_info">يستقبل Android Auto الميكروفون دائمًا بمعدل 16000 هرتز، 16 بت، أحادي. ويرفض أي شيء آخر، لذا تغيّر هذه الإعدادات ما يفعله العتاد، لا ما يُرسل إلى الهاتف.</string>
     <string name="mic_echo_canceler">إلغاء الصدى (AEC)</string>
+    <string name="mic_gain_help">يرفع مستوى ميكروفون الوحدة قبل إرساله إلى الهاتف مع حدّ ناعم لمنع تشوّه الصوت العالي. جرّب +6 ديسيبل إذا قال لك المتصل إن صوتك منخفض. اضغط للتنقل بين 0 و+3 و+6 و+9 و+12 ديسيبل.</string>
     <string name="mic_echo_canceler_description">يحاول إزالة الصدى من الميكروفون. عطّله إذا لاحظت انقطاع الصوت أو تشوّهه.</string>
     <string name="mic_echo_canceler_summary">يزيل الصدى من الميكروفون. أوقفه عند الصمت أو التشوه.</string>
     <string name="mic_noise_suppressor">إخماد الضوضاء (NS)</string>

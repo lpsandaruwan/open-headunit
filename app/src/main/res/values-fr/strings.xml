@@ -673,6 +673,7 @@
         <item>Casque Bluetooth (SCO)</item>
     </string-array>
     <string name="mic_echo_canceler">Annulation d\'écho (AEC)</string>
+    <string name="mic_gain_help">Amplifie le micro de l\'autoradio avant l\'envoi au téléphone, avec un limiteur doux pour éviter la saturation. Essayez +6 dB si votre correspondant dit que vous parlez bas. Touchez pour passer de 0 à +3, +6, +9 puis +12 dB.</string>
     <string name="mic_echo_canceler_description">Tente de supprimer l\'écho du microphone. Désactivez cette option en cas de silence ou de distorsion.</string>
     <string name="mic_echo_canceler_summary">Supprime l\'écho du micro. Désactivez-le en cas de silence ou de distorsion.</string>
     <string name="mic_noise_suppressor">Suppression du bruit (NS)</string>

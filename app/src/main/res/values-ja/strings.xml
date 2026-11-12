@@ -762,6 +762,7 @@
     <string name="microphone_settings_description">マイク入力とオーディオ処理の設定を行います。</string>
     <string name="mic_wire_format_info">Android Auto は常に 16000 Hz、16 ビット、モノラルでマイクを受け取ります。それ以外は拒否されるため、これらの設定はハードウェアの動作を変えるだけで、スマートフォンに送られる内容は変わりません。</string>
     <string name="mic_echo_canceler">エコーキャンセラー (AEC)</string>
+    <string name="mic_gain_help">電話に送る前にヘッドユニットのマイク音量を上げます。大きな声が歪まないようソフトリミッターを併用します。相手に声が小さいと言われたら +6 dB を試してください。タップで 0、+3、+6、+9、+12 dB を切り替えます。</string>
     <string name="mic_echo_canceler_description">マイクからのエコーを除去します。無音になったり音が歪んだりする場合は無効にしてください。</string>
     <string name="mic_echo_canceler_summary">マイクのエコーを除去します。無音や音割れがあるときはオフにします。</string>
     <string name="mic_noise_suppressor">ノイズサプレッサー (NS)</string>

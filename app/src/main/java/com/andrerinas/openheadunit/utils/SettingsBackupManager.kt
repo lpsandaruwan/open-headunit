@@ -216,6 +216,7 @@ object SettingsBackupManager {
         "mic-echo-canceler" to ValueType.BOOLEAN,
         "mic-noise-suppressor" to ValueType.BOOLEAN,
         "mic-auto-gain-control" to ValueType.BOOLEAN,
+        "mic-gain-db" to ValueType.INT,
         "attach_hw_dsp_equalizer" to ValueType.BOOLEAN,
         "use-native-ssl" to ValueType.BOOLEAN,
         "auto-start-self-mode" to ValueType.BOOLEAN,

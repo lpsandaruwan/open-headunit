@@ -845,6 +845,7 @@
         <item>Auscultadores Bluetooth (SCO)</item>
     </string-array>
     <string name="mic_echo_canceler">Cancelamento de eco (AEC)</string>
+    <string name="mic_gain_help">Aumenta o nível do microfone do rádio antes de o enviar ao telefone, com um limitador suave para a voz alta não distorcer. Experimente +6 dB se disserem que fala baixo. Toque para alternar entre 0, +3, +6, +9 e +12 dB.</string>
     <string name="mic_echo_canceler_description">Tenta remover o eco do microfone. Desative se notar silêncio ou distorção.</string>
     <string name="mic_echo_canceler_summary">Remove o eco do microfone. Desative se houver silêncio ou distorção.</string>
     <string name="mic_noise_suppressor">Supressão de ruído (NS)</string>

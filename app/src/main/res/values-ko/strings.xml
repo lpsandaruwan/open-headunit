@@ -458,6 +458,7 @@
         <item>블루투스 헤드셋(SCO)</item>
     </string-array>
     <string name="mic_echo_canceler">에코 제거(AEC)</string>
+    <string name="mic_gain_help">전화로 보내기 전에 헤드유닛 마이크 음량을 높이며, 큰 목소리가 깨지지 않도록 부드러운 리미터를 적용합니다. 상대방이 목소리가 작다고 하면 +6 dB를 시도해 보세요. 탭하여 0, +3, +6, +9, +12 dB 사이를 전환합니다.</string>
     <string name="mic_echo_canceler_description">마이크 입력의 에코 제거를 시도합니다. 소리가 들리지 않거나 왜곡되면 사용 중지하세요.</string>
     <string name="mic_echo_canceler_summary">마이크의 에코를 제거합니다. 소리가 없거나 왜곡되면 사용 중지하세요.</string>
     <string name="mic_noise_suppressor">소음 억제(NS)</string>

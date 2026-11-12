@@ -752,6 +752,7 @@
     <string name="microphone_settings_description">A mikrofonbemenet és a hangfeldolgozás konfigurálása.</string>
     <string name="mic_wire_format_info">Az Android Auto a mikrofonhangot mindig 16000 Hz-en, 16 bites, mono formában fogadja. Mást nem fogad el, ezért ezek a beállítások a hardver működését módosítják, nem azt, amit a telefon kap.</string>
     <string name="mic_echo_canceler">Visszhangkioltás (AEC)</string>
+    <string name="mic_gain_help">Felerősíti a fejegység mikrofonját, mielőtt a telefonra küldené, lágy limiterrel, hogy a hangos beszéd ne torzuljon. Próbálja a +6 dB-t, ha a hívott fél szerint halkan hallatszik. Koppintson a 0, +3, +6, +9 és +12 dB közötti váltáshoz.</string>
     <string name="mic_echo_canceler_description">Megpróbálja eltávolítani a visszhangot a mikrofonból. Kapcsolja ki, ha csendet vagy torzítást tapasztal.</string>
     <string name="mic_echo_canceler_summary">Eltávolítja a visszhangot a mikrofonról. Kapcsolja ki, ha csend vagy torzítás van.</string>
     <string name="mic_noise_suppressor">Zajcsökkentés (NS)</string>

@@ -753,6 +753,7 @@
     <string name="microphone_settings_description">Microfooningang en audioverwerking configureren.</string>
     <string name="mic_wire_format_info">Android Auto ontvangt de microfoon altijd op 16000 Hz, 16-bits, mono. Al het andere wordt geweigerd, dus deze instellingen veranderen wat de hardware doet, niet wat naar de telefoon wordt gestuurd.</string>
     <string name="mic_echo_canceler">Echo-onderdrukking (AEC)</string>
+    <string name="mic_gain_help">Versterkt de microfoon van de autoradio voordat die naar de telefoon gaat, met een zachte limiter zodat luide spraak niet vervormt. Probeer +6 dB als de beller zegt dat u zacht klinkt. Tik om te schakelen tussen 0, +3, +6, +9 en +12 dB.</string>
     <string name="mic_echo_canceler_description">Probeert echo van de microfoon te verwijderen. Zet dit uit als je stilte of vervorming hoort.</string>
     <string name="mic_echo_canceler_summary">Verwijdert echo uit de microfoon. Zet uit bij stilte of vervorming.</string>
     <string name="mic_noise_suppressor">Ruisonderdrukking (NS)</string>

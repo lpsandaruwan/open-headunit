@@ -844,6 +844,7 @@
         <item>Headset Bluetooth (SCO)</item>
     </string-array>
     <string name="mic_echo_canceler">Pembatalan gema (AEC)</string>
+    <string name="mic_gain_help">Menaikkan level mikrofon head unit sebelum dikirim ke ponsel, dengan limiter lembut agar suara keras tidak pecah. Coba +6 dB jika lawan bicara bilang suara Anda pelan. Ketuk untuk berganti antara 0, +3, +6, +9, dan +12 dB.</string>
     <string name="mic_echo_canceler_description">Mencoba menghilangkan gema dari mikrofon. Nonaktifkan jika suara hilang atau terdistorsi.</string>
     <string name="mic_echo_canceler_summary">Menghapus gema dari mikrofon. Matikan jika hening atau terdistorsi.</string>
     <string name="mic_noise_suppressor">Peredam bising (NS)</string>

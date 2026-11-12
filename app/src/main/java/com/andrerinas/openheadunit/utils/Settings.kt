@@ -1450,6 +1450,11 @@ class Settings(private val context: Context) {
         get() = prefs.getBoolean("mic-noise-suppressor", false)
         set(value) { prefs.edit().putBoolean("mic-noise-suppressor", value).apply() }
 
+    /** Software lift of the head unit's microphone in dB, 0-12. 0 sends the capture untouched. */
+    var micGainDb: Int
+        get() = com.andrerinas.openheadunit.decoder.audio.MicGain.clamp(prefs.getInt("mic-gain-db", 0))
+        set(value) { prefs.edit().putInt("mic-gain-db", com.andrerinas.openheadunit.decoder.audio.MicGain.clamp(value)).apply() }
+
     var micAutoGainControl: Boolean
         get() = prefs.getBoolean("mic-auto-gain-control", false)
         set(value) { prefs.edit().putBoolean("mic-auto-gain-control", value).apply() }

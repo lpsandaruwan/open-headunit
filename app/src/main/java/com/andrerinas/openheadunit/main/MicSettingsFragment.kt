@@ -40,6 +40,7 @@ class MicSettingsFragment : Fragment() {
     private var pendingMicEchoCanceler: Boolean? = null
     private var pendingMicNoiseSuppressor: Boolean? = null
     private var pendingMicAutoGainControl: Boolean? = null
+    private var pendingMicGainDb: Int? = null
 
     private var hasChanges = false
     private var requiresRestart = false
@@ -61,6 +62,7 @@ class MicSettingsFragment : Fragment() {
         pendingMicEchoCanceler = settings.micEchoCanceler
         pendingMicNoiseSuppressor = settings.micNoiseSuppressor
         pendingMicAutoGainControl = settings.micAutoGainControl
+        pendingMicGainDb = settings.micGainDb
 
         // Intercept back press
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
@@ -123,6 +125,7 @@ class MicSettingsFragment : Fragment() {
         pendingMicEchoCanceler?.let { if (it != settings.micEchoCanceler) settings.micEchoCanceler = it }
         pendingMicNoiseSuppressor?.let { if (it != settings.micNoiseSuppressor) settings.micNoiseSuppressor = it }
         pendingMicAutoGainControl?.let { if (it != settings.micAutoGainControl) settings.micAutoGainControl = it }
+        pendingMicGainDb?.let { if (it != settings.micGainDb) settings.micGainDb = it }
 
         if (requiresRestart) {
             if (App.provide(requireContext()).commManager.isConnected) {
@@ -146,7 +149,8 @@ class MicSettingsFragment : Fragment() {
                 pendingMicInputSource != settings.micInputSource ||
                 pendingMicEchoCanceler != settings.micEchoCanceler ||
                 pendingMicNoiseSuppressor != settings.micNoiseSuppressor ||
-                pendingMicAutoGainControl != settings.micAutoGainControl
+                pendingMicAutoGainControl != settings.micAutoGainControl ||
+                pendingMicGainDb != settings.micGainDb
 
         hasChanges = anyChange
         // All mic settings currently require a restart to apply to the MicRecorder session
@@ -252,6 +256,20 @@ class MicSettingsFragment : Fragment() {
             isEnabled = NoiseSuppressor.isAvailable(),
             onCheckedChanged = { isChecked ->
                 pendingMicNoiseSuppressor = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        // Software gain: steps through 0, +3, +6, +9, +12 dB
+        items.add(SettingItem.SettingEntry(
+            stableId = "micGainDb",
+            nameResId = R.string.mic_gain,
+            helpResId = R.string.mic_gain_help,
+            value = if ((pendingMicGainDb ?: 0) == 0) getString(R.string.mic_gain_off) else "+${pendingMicGainDb} dB",
+            onClick = { _ ->
+                val next = (pendingMicGainDb ?: 0) + 3
+                pendingMicGainDb = if (next > com.andrerinas.openheadunit.decoder.audio.MicGain.MAX_DB) 0 else next
                 checkChanges()
                 updateSettingsList()
             }

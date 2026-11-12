@@ -753,6 +753,7 @@
     <string name="microphone_settings_description">Nastavení vstupu mikrofonu a zpracování zvuku.</string>
     <string name="mic_wire_format_info">Android Auto vždy přijímá mikrofon na 16000 Hz, 16 bitů, mono. Cokoli jiného odmítne, takže tato nastavení mění chování hardwaru, nikoli to, co se odesílá do telefonu.</string>
     <string name="mic_echo_canceler">Potlačení ozvěny (AEC)</string>
+    <string name="mic_gain_help">Zesílí mikrofon hlavní jednotky před odesláním do telefonu s jemným omezovačem, aby hlasitá řeč nezkreslila. Zkuste +6 dB, pokud volaný říká, že vás špatně slyší. Klepnutím procházíte 0, +3, +6, +9 a +12 dB.</string>
     <string name="mic_echo_canceler_description">Pokusí se odstranit ozvěnu z mikrofonu. Vypněte, pokud zaznamenáte ticho nebo zkreslení.</string>
     <string name="mic_echo_canceler_summary">Odstraní z mikrofonu ozvěnu. Při tichu nebo zkreslení vypněte.</string>
     <string name="mic_noise_suppressor">Potlačení šumu (NS)</string>

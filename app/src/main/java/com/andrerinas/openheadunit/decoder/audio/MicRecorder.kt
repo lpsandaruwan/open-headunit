@@ -85,6 +85,7 @@ class MicRecorder(
         var bytes = 0L
         var emptyReads = 0
         var peak = 0
+        val meter = MicLevelMeter()
     }
     @Volatile private var activeCapture: CaptureRun? = null
     var listener: Listener? = null
@@ -243,11 +244,30 @@ class MicRecorder(
         val bytes = if (converter == null) run.buffer else run.wireBuffer
         val wireLen = converter?.decimate(run.buffer, len, bytes) ?: len
         if (wireLen > 0) {
+            MicGain.apply(bytes, wireLen, gainDb)
+            logLevelWindow(run, bytes, wireLen)
             val peak = peakAmplitude(bytes, wireLen)
             run.peak = maxOf(run.peak, peak)
             run.listener?.onMicDataAvailable(bytes, wireLen, peak)
         }
         return len
+    }
+
+    /** Read once per capture: a gain change applies on the restart every mic setting already needs. */
+    private val gainDb: Int = MicGain.clamp(settings.micGainDb)
+
+    /**
+     * A line every [MicLevelMeter.WINDOW_SAMPLES] of what the phone is being sent (10 s at the wire
+     * rate), so a call that went one-way can be read back. Counted in samples, not by the clock:
+     * a stalled input then stays silent in the log instead of printing a misleading window.
+     */
+    private fun logLevelWindow(run: CaptureRun, bytes: ByteArray, len: Int) {
+        val m = run.meter
+        m.add(bytes, len)
+        if (m.samples < MicLevelMeter.WINDOW_SAMPLES) return
+        AppLog.i("MicRecorder: level | last ${m.samples / MicCaptureFormat.SAMPLE_RATE_HZ}s peak=${m.peak}/32767 " +
+            "rms=${m.rms()} clipped=${m.clipped} gain=+${gainDb}dB")
+        m.reset()
     }
 
     /**

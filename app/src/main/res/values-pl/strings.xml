@@ -754,6 +754,7 @@
     <string name="microphone_settings_description">Skonfiguruj wejście mikrofonu i przetwarzanie dźwięku.</string>
     <string name="mic_wire_format_info">Android Auto zawsze wymaga sygnału z mikrofonu w formacie 16 000 Hz, 16 bitów, mono i odrzuca inne parametry. Te ustawienia zmieniają sposób pracy samego urządzenia, a nie format przesyłany do telefonu.</string>
     <string name="mic_echo_canceler">Usuwanie echa (AEC)</string>
+    <string name="mic_gain_help">Podbija mikrofon radia przed wysłaniem do telefonu, z łagodnym limiterem, aby głośna mowa nie zniekształcała. Spróbuj +6 dB, jeśli rozmówca mówi, że cię słabo słychać. Stuknij, aby przełączać 0, +3, +6, +9 i +12 dB.</string>
     <string name="mic_echo_canceler_description">Próbuje usunąć echo z mikrofonu. Wyłącz, jeśli nic nie słychać lub dźwięk jest zniekształcony.</string>
     <string name="mic_echo_canceler_summary">Usuwa echo z mikrofonu. Wyłącz, jeśli słychać ciszę lub zniekształcenia.</string>
     <string name="mic_noise_suppressor">Tłumienie szumów (NS)</string>

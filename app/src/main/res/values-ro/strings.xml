@@ -754,6 +754,7 @@
     <string name="microphone_settings_description">Configurează intrarea microfonului și procesarea audio.</string>
     <string name="mic_wire_format_info">Android Auto primește întotdeauna microfonul la 16000 Hz, 16 biți, mono. Respinge orice altceva, așa că aceste setări schimbă ce face hardware-ul, nu ce se trimite către telefon.</string>
     <string name="mic_echo_canceler">Anularea ecoului (AEC)</string>
+    <string name="mic_gain_help">Ridică nivelul microfonului unității înainte de a-l trimite telefonului, cu un limitator moale ca vocea tare să nu distorsioneze. Încercați +6 dB dacă interlocutorul spune că vă aude încet. Atingeți pentru a trece prin 0, +3, +6, +9 și +12 dB.</string>
     <string name="mic_echo_canceler_description">Încearcă să elimine ecoul din microfon. Dezactivează dacă auzi liniște sau distorsiuni.</string>
     <string name="mic_echo_canceler_summary">Elimină ecoul din microfon. Dezactivează dacă auzi liniște sau distorsiuni.</string>
     <string name="mic_noise_suppressor">Suprimarea zgomotului (NS)</string>

@@ -753,6 +753,7 @@
     <string name="microphone_settings_description">設定麥克風輸入和音訊處理。</string>
     <string name="mic_wire_format_info">Android Auto 一律以 16000 Hz、16 位元、單聲道接收麥克風。其他格式一概拒絕，因此這些設定改變的是硬體的行為，而非傳送給手機的內容。</string>
     <string name="mic_echo_canceler">回音消除 (AEC)</string>
+    <string name="mic_gain_help">在傳送給手機之前提升車機麥克風的音量，並使用柔和限幅器避免大聲說話時失真。如果對方說您聲音太小，請嘗試 +6 dB。點按可在 0、+3、+6、+9 和 +12 dB 之間切換。</string>
     <string name="mic_echo_canceler_description">嘗試消除麥克風回音。若遇到無聲或音訊失真，請停用此功能。</string>
     <string name="mic_echo_canceler_summary">消除麥克風的回音。無聲或失真時請關閉。</string>
     <string name="mic_noise_suppressor">雜訊抑制 (NS)</string>
