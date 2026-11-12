@@ -22,6 +22,7 @@ class SettingsPendingCopy {
     var resolution: Int? = null
     var dpi: Int? = null
     var pixelAspectRatioE4: Int? = null
+    var renderScalePercent: Int? = null
     var staticBSSID: String? = null
     var staticP2pBSSID: String? = null
     var fullscreenMode: Settings.FullscreenMode? = null
@@ -44,6 +45,7 @@ class SettingsPendingCopy {
     var audioLatencyMultiplier: Int? = null
     var audioMatchingMode: com.andrerinas.openheadunit.decoder.audio.AudioTimeCorrectionMode? = null
     var useLibusb: Boolean? = null
+    var experimentalAsyncUsbReads: Boolean? = null
     var listenForUsbDevices: Boolean? = null
     var audioQueueCapacity: Int? = null
     var showToastMessages: Boolean? = null
@@ -114,6 +116,7 @@ class SettingsPendingCopy {
         resolution = settings.resolutionId
         dpi = settings.dpiPixelDensity
         pixelAspectRatioE4 = settings.pixelAspectRatioE4
+        renderScalePercent = settings.renderScalePercent
         staticBSSID = settings.staticBSSID
         staticP2pBSSID = settings.staticP2pBSSID
         fullscreenMode = settings.fullscreenMode
@@ -136,6 +139,7 @@ class SettingsPendingCopy {
         audioLatencyMultiplier = settings.audioLatencyMultiplier
         audioMatchingMode = settings.audioMatchingMode
         useLibusb = settings.useLibusb
+        experimentalAsyncUsbReads = settings.experimentalAsyncUsbReads
         listenForUsbDevices = settings.listenForUsbDevices
         audioQueueCapacity = settings.audioQueueCapacity
         showToastMessages = settings.showToastMessages
@@ -207,6 +211,7 @@ class SettingsPendingCopy {
         resolution != settings.resolutionId ||
         dpi != settings.dpiPixelDensity ||
         pixelAspectRatioE4 != settings.pixelAspectRatioE4 ||
+        renderScalePercent != settings.renderScalePercent ||
         staticBSSID != settings.staticBSSID ||
         staticP2pBSSID != settings.staticP2pBSSID ||
         fullscreenMode != settings.fullscreenMode ||
@@ -229,6 +234,7 @@ class SettingsPendingCopy {
         audioLatencyMultiplier != settings.audioLatencyMultiplier ||
         audioMatchingMode != settings.audioMatchingMode ||
         useLibusb != settings.useLibusb ||
+        experimentalAsyncUsbReads != settings.experimentalAsyncUsbReads ||
         listenForUsbDevices != settings.listenForUsbDevices ||
         audioQueueCapacity != settings.audioQueueCapacity ||
         showToastMessages != settings.showToastMessages ||

@@ -47,6 +47,23 @@ object DecoderStallCausePolicy {
      */
     const val KEYFRAME_STARVATION_PATIENCE_MS = 15_000L
 
+    /**
+     * How long input has to have been missing before the first bytes after it count as the stream resuming.
+     * A box that stalls for a couple of seconds sends nothing - no video, no audio - and then carries on.
+     */
+    const val INPUT_RESUME_GAP_MS = 1_000L
+
+    /** True when bytes arrive after a gap long enough that the codec could not have been given anything to show. */
+    fun inputResumed(nowMs: Long, lastInputMs: Long): Boolean = nowMs - lastInputMs > INPUT_RESUME_GAP_MS
+
+    /**
+     * Time the decoder has been silent *while it was being fed*. Silence before the stream resumed is not the
+     * decoder's: a 2 s gap in the stream used to read as a 2 s decoder stall the moment data returned, and the
+     * "fix" - rebuilding the codec - turned a pause into a black screen until the next keyframe.
+     */
+    fun silentWhileFedMs(nowMs: Long, lastOutputMs: Long, inputResumedMs: Long): Long =
+        nowMs - maxOf(lastOutputMs, inputResumedMs)
+
     enum class Cause {
         /** The phone has stopped sending. Not a decoder fault and never was; the caller stays silent. */
         PHONE_IDLE,

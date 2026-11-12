@@ -33,7 +33,8 @@ class UsbNative {
         }
     }
 
-    fun wrap(connection: UsbDeviceConnection, epInAddr: Int, epOutAddr: Int): Boolean {
+    /** [interfaceNumber] is the interface libusb takes over: never assume 0, which can be a network function. */
+    fun wrap(connection: UsbDeviceConnection, epInAddr: Int, epOutAddr: Int, interfaceNumber: Int = 0): Boolean {
         epIn = epInAddr
         epOut = epOutAddr
         if (contextPtr == 0L) {
@@ -46,8 +47,8 @@ class UsbNative {
                 AppLog.e("UsbNative: wrapDevice returned NULL handle")
                 return false
             }
-            detachKernel(handlePtr, 0)
-            claimInterface(handlePtr, 0)
+            detachKernel(handlePtr, interfaceNumber)
+            claimInterface(handlePtr, interfaceNumber)
             AppLog.i("UsbNative: Wrapped device fd=${connection.fileDescriptor} successfully")
             return true
         } catch (e: Throwable) {

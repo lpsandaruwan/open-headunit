@@ -25,13 +25,14 @@ class TlsWriteDiagnosticTest {
                 val transport = mock(AapTransport::class.java, CALLS_REAL_METHODS)
                 AapTransport::class.java.getDeclaredField("connection").apply { isAccessible = true }
                     .set(transport, connection)
-                val write = AapTransport::class.java.getDeclaredMethod("writeTlsFrame",
-                    ByteArray::class.java, Int::class.javaPrimitiveType).apply { isAccessible = true }
+                // writeTlsFrame is internal (its name is mangled), so find it by prefix.
+                val write = AapTransport::class.java.declaredMethods.first { it.name.startsWith("writeTlsFrame") }
+                    .apply { isAccessible = true }
                 assertEquals(result ?: -1, write.invoke(transport, bytes, 8))
                 if (result == 8) assertTrue(lines.isEmpty())
                 else {
                     assertEquals(1, lines.size)
-                    assertTrue(lines.single().contains("AapTransport: send incomplete (ret=${result ?: -1} of 8)"))
+                    assertTrue(lines.single().contains("AapTransport: send incomplete (ret=${result ?: -1} of 8"))
                     if (result == null) assertTrue(lines.single().contains("IOException: link gone"))
                 }
             }

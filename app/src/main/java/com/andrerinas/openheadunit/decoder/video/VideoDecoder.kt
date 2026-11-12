@@ -419,6 +419,8 @@ class VideoDecoder(
     // as opposed to lastFrameRenderedMs (output side). Lets the projection watchdog tell a
     // phone-side pause (no input) apart from a local display stall (input flowing, nothing drawn).
     @Volatile var lastInputBytesReceivedMs: Long = 0L
+    /** When bytes last arrived after a gap of more than a second; the decoder is only judged from then. */
+    @Volatile private var inputResumedMs: Long = 0L
 
     // The bundled decoder can render directly to a surface or through the GLES YUV sink.
     // Bundled output has no MediaCodec presentation-timestamp accounting.
@@ -987,8 +989,11 @@ class VideoDecoder(
     fun decode(buffer: ByteArray, offset: Int, size: Int, forceSoftware: Boolean, announcedCodec: CodecType) {
         var repairedKeyframeCallback: (() -> Unit)? = null
         val frame = synchronized(this) {
-            // Input-side liveness: bytes are arriving from the phone right now.
-            lastInputBytesReceivedMs = elapsedRealtime()
+            // Input-side liveness: bytes are arriving from the phone right now. After a long gap this is the
+            // stream resuming, and the stall clock starts from here, not from the last frame before the gap.
+            val inputNow = elapsedRealtime()
+            if (DecoderStallCausePolicy.inputResumed(inputNow, lastInputBytesReceivedMs)) inputResumedMs = inputNow
+            lastInputBytesReceivedMs = inputNow
 
             // Check if a restart was requested by output thread
             if (decoderNeedsRestart) {
@@ -2452,7 +2457,7 @@ class VideoDecoder(
                     // Android Auto has simply paused the stream (idle/static screen), so
                     // we update lastOutputMs to prevent false-positive restarts and screen flickering.
                     val now = elapsedRealtime()
-                    val stallGap = now - lastOutputMs
+                    val stallGap = DecoderStallCausePolicy.silentWhileFedMs(now, lastOutputMs, inputResumedMs)
                     // A rebuilt codec that has not yet produced its first frame gets the longer
                     // warm-up window when this session has already rendered - see the constant.
                     val stallThreshold = if (lastFrameRenderedMs == 0L && renderedThisSession) {

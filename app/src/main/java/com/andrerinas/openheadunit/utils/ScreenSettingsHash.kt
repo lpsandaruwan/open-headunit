@@ -25,6 +25,7 @@ object ScreenSettingsHash {
         videoFitMode: Int,
         forcedScale: Boolean,
         normalisation: ScreenOrientationPolicy.Normalisation,
+        renderScalePercent: Int = RenderScalePolicy.FULL,
     ): Int {
         var hash = 17
         hash = 31 * hash + resolutionId
@@ -40,6 +41,8 @@ object ScreenSettingsHash {
         hash = 31 * hash + videoFitMode
         hash = 31 * hash + (if (forcedScale) 1 else 0)
         hash = 31 * hash + normalisation.ordinal
+        // Folded only when set, so every measurement taken before the setting existed still matches.
+        if (renderScalePercent != RenderScalePolicy.FULL) hash = 31 * hash + renderScalePercent
         return hash
     }
 }

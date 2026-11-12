@@ -27,6 +27,10 @@ class PeerCloseReasonTest {
         set("videoBufferPool", java.util.concurrent.LinkedBlockingQueue<ByteArray>())
         set("videoBacklog", java.util.concurrent.atomic.AtomicInteger())
         set("videoShedTotal", java.util.concurrent.atomic.AtomicLong())
+        set("mediaAcks", MediaAckAccumulator())
+        set("outbound", PriorityOutboundQueue<Any>())
+        set("outboundDrainScheduled", java.util.concurrent.atomic.AtomicBoolean())
+        set("outboundDrainRunnable", Runnable { })
         // Keep the real retirement path: callback failure must not skip resource cleanup.
         for (name in listOf("videoDecoder", "aapAudio", "aapVideo", "ssl", "micSessions", "focusCycleLever")) {
             val field = AapTransport::class.java.getDeclaredField(name).apply { isAccessible = true }

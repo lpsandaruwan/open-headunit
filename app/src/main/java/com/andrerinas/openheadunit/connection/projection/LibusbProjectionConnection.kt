@@ -5,6 +5,7 @@ import android.hardware.usb.UsbDeviceConnection
 import android.hardware.usb.UsbEndpoint
 import android.hardware.usb.UsbInterface
 import android.hardware.usb.UsbManager
+import android.os.Build
 import android.os.SystemClock
 import com.andrerinas.openheadunit.connection.usb.UsbDeviceCompat
 import com.andrerinas.openheadunit.connection.usb.UsbNative
@@ -26,8 +27,11 @@ class LibusbProjectionConnection(usbMgr: UsbManager,
     @Volatile private var endpointOut: UsbEndpoint? = null
     private var usbNative: UsbNative? = null
 
-    // Direct ByteBuffer for JNI and tracking leftover state
-    private val readBuffer = ByteBuffer.allocateDirect(16384)
+    // One direct buffer for the life of the connection. Keep the same API-aware capacity as the
+    // framework transport so switching backends does not change receive scheduling.
+    private val readBuffer = ByteBuffer.allocateDirect(
+        UsbReadBufferPolicy.capacity(Build.VERSION.SDK_INT)
+    )
     private var leftoverSize = 0
     private var leftoverPos = 0
 
@@ -107,7 +111,7 @@ class LibusbProjectionConnection(usbMgr: UsbManager,
                 }
                 return@withContext false
             }
-            val iface = device.getInterface(0)
+            val iface = UsbDeviceCompat.accessoryInterface(device)
             synchronized(stateLock) {
                 usbInterface = iface
             }
@@ -156,7 +160,7 @@ class LibusbProjectionConnection(usbMgr: UsbManager,
             }
 
             val native = UsbNative()
-            if (!native.wrap(conn, epIn.address, epOut.address)) {
+            if (!native.wrap(conn, epIn.address, epOut.address, iface.id)) {
                 AppLog.e("LibusbAccessoryConnection: Failed to wrap USB device via JNI")
                 synchronized(stateLock) {
                     native.close()

@@ -23,6 +23,7 @@ import com.andrerinas.openheadunit.utils.ProjectionHealthPolicy
 import com.andrerinas.openheadunit.utils.ProjectionHealthRecorder
 import com.andrerinas.openheadunit.utils.ProjectionHealthStore
 import com.andrerinas.openheadunit.utils.ProjectionSessionSummary
+import com.andrerinas.openheadunit.utils.UsbProjectionHealthStore
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import com.andrerinas.openheadunit.decoder.audio.AudioDecoder
@@ -602,9 +603,13 @@ class CommManager(
             conn = if (settings.useLibusb) {
                 LibusbProjectionConnection(usbManager, currentDevice)
             } else {
-                StandardUsbProjectionConnection(usbManager, currentDevice,
+                StandardUsbProjectionConnection(
+                    usbManager,
+                    currentDevice,
+                    experimentalAsyncReads = settings.experimentalAsyncUsbReads,
                     readFaultArmed = { settings.debugUsbReadFault },
-                    disarmReadFault = { settings.debugUsbReadFault = false })
+                    disarmReadFault = { settings.debugUsbReadFault = false },
+                )
             }
             val candidate = conn
             val registered = synchronized(transportLifecycleLock) {
@@ -1726,9 +1731,17 @@ class CommManager(
         // Self-guarding against the re-entrant second call described above: the flag is consumed
         // here, so the second pass sees a session that never reached the handshake and counts
         // nothing.
+        val renderedAnyFrame = videoDecoder.framesRenderedThisSession > 0L
         recordProjectionHealth()
+        if (connection is AbstractUsbProjectionConnection) {
+            UsbProjectionHealthStore(context).record(
+                reachedHandshake = sessionReachedHandshake,
+                renderedAnyFrame = renderedAnyFrame,
+                deliberateEnd = reason != DisconnectReason.CONNECTION_ENDED,
+            )
+        }
         dimState.resetForNewSession()
-        noteSessionEnded(renderedAnyFrame = videoDecoder.framesRenderedThisSession > 0L, deliberateEnd = reason != DisconnectReason.CONNECTION_ENDED)
+        noteSessionEnded(renderedAnyFrame = renderedAnyFrame, deliberateEnd = reason != DisconnectReason.CONNECTION_ENDED)
         // The close is in its own phase because it is the one that must happen: a throw from the
         // ByeBye send or either decoder stop used to skip it, leaving the phone's head unit server
         // holding a peer that never came back. See TeardownGuard.

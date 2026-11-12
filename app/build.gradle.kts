@@ -7,6 +7,9 @@ plugins {
     kotlin("android")
 }
 
+val embedOablLink = providers.gradleProperty("headunitOablLink").orNull == "true"
+val dongfengVysor = providers.gradleProperty("headunitVysor").orNull == "true"
+
 android {
     compileSdk = 36
     ndkVersion = "29.0.14206865"
@@ -75,6 +78,7 @@ android {
     sourceSets {
         getByName("main") {
             assets.srcDirs("${project.layout.buildDirectory.get().asFile}/generated/assets/root")
+            java.srcDir(if (embedOablLink) "src/oablLink/java" else "src/noOablLink/java")
         }
     }
 
@@ -93,11 +97,24 @@ android {
         // installs, testers) and existing users just get a normal update. Only the display name
         // changed to Open Headunit. The code package and namespace stay openheadunit, so the
         // applicationId deliberately differs from the namespace, like com.google.talk for Hangouts.
-        applicationId = "com.andrerinas.headunitrevived"
+        // On the Dongfeng head unit (DFRD firmware) the vendor PackageManager rejects any
+        // non-Dongfeng-signed APK unless its package name is "com.koushikdutta.vysor", the one
+        // name its cert allowlist exempts. Pass -PheadunitVysor=true to install there; the code
+        // package and namespace stay openheadunit, only the installed id changes.
+        applicationId =
+            if (dongfengVysor) "com.koushikdutta.vysor"
+            else "com.andrerinas.headunitrevived"
         minSdk = 16
+        if (embedOablLink) minSdk = 26
         targetSdk = 36
-        versionCode = 123
+        versionCode = when {
+            embedOablLink -> 134
+            dongfengVysor -> 135
+            else -> 123
+        }
         versionName = "4.0.0"
+        if (embedOablLink) versionNameSuffix = "-oabl-link-bt8"
+        else if (dongfengVysor) versionNameSuffix = "-dongfeng-android8"
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
@@ -119,7 +136,7 @@ android {
     productFlavors {
         create("playstore") {
             dimension = "distribution"
-            minSdk = 21
+            minSdk = if (embedOablLink) 26 else 21
         }
         create("github") {
             dimension = "distribution"
@@ -249,6 +266,7 @@ android {
 }
 
 dependencies {
+    if (embedOablLink) implementation(project(":oablLink"))
     // Conscrypt (Flavor specific: 2.6.1 for Playstore 16KB alignment; 2.5.3 for Github minSdk 16)
     "playstoreImplementation"("org.conscrypt:conscrypt-android:2.6.1")
     "githubImplementation"("org.conscrypt:conscrypt-android:2.5.3")

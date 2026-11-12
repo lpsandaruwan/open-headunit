@@ -15,7 +15,8 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.ConscryptMode
 
 @RunWith(RobolectricTestRunner::class)
-@Config(application = Application::class, sdk = [23, 35])
+// 26: the Dongfeng build's minSdk with Link embedded; Robolectric can't load its app on anything older.
+@Config(application = Application::class, sdk = [26, 35])
 // No TLS is under test; the process-wide Conscrypt provider can poison later plain-JVM TLS.
 @ConscryptMode(ConscryptMode.Mode.OFF)
 class BluetoothDefaultAdapterTest {

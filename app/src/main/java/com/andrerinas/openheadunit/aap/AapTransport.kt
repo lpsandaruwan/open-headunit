@@ -13,6 +13,7 @@ import android.os.SystemClock
 import android.util.SparseIntArray
 import android.view.KeyEvent
 import com.andrerinas.openheadunit.aap.protocol.Channel
+import com.andrerinas.openheadunit.aap.protocol.MsgType
 import com.andrerinas.openheadunit.aap.protocol.messages.KeyCodeEvent
 import com.andrerinas.openheadunit.aap.protocol.messages.MediaAck
 import com.andrerinas.openheadunit.aap.protocol.messages.MicrophoneResponse
@@ -87,17 +88,38 @@ class AapTransport(
 
     val ssl: AapSsl = externalSsl?.newSession() ?: AapSslContext(SingleKeyKeyManager(context))
     private val tlsWriter = AapTlsWriter(ssl, ::writeTlsFrame)
+    private val mediaAcks = MediaAckAccumulator()
+    private val mediaAckFlushRunnable = Runnable { drainReadyMediaAcks() }
+    private data class OutboundWork(
+        val label: String,
+        val channel: Int?,
+        val action: () -> Int?,
+    )
+    private val outbound = PriorityOutboundQueue<OutboundWork>()
+    private val outboundDrainScheduled = java.util.concurrent.atomic.AtomicBoolean(false)
+    private val outboundDrainRunnable = Runnable { drainOneOutbound() }
 
-    private fun writeTlsFrame(bytes: ByteArray, size: Int): Int {
+    internal fun writeTlsFrame(bytes: ByteArray, size: Int): Int {
+        val target = connection ?: return -1
+        // The AI box can briefly stop servicing bulk OUT while encoding, and for a minute or two after it
+        // boots (stalls of 0.9 to 1.0 s seen, one past 1 s). Disconnects had transferred 0/39 bytes at the
+        // old 250 ms deadline. Give USB 2.5 bounded seconds; closing the link waits at most 1500 ms for a
+        // write in flight, then cancels it.
+        // Never retry ciphertext here: a short write may already have reached the peer.
+        val timeout = if (target.type == ProjectionConnection.Type.USB) 2500 else 250
+        val started = System.nanoTime()
         val sent = try {
-            connection?.sendBlocking(bytes, size, 250) ?: -1
+            target.sendBlocking(bytes, size, timeout)
         } catch (e: Exception) {
             AppLog.w("AapTransport: send incomplete (ret=-1 of $size): ${e.javaClass.simpleName}: ${e.message}")
             return -1
         }
         // Both application and TLS-only control frames use this wire boundary. Report actual
         // ciphertext bytes here; the plaintext message length cannot describe a short write.
-        if (sent != size) AppLog.w("AapTransport: send incomplete (ret=$sent of $size)")
+        val elapsed = (System.nanoTime() - started) / 1_000_000
+        if (sent != size) AppLog.w("AapTransport: send incomplete (ret=$sent of $size, elapsed=${elapsed}ms, timeout=${timeout}ms)")
+        else if (target.type == ProjectionConnection.Type.USB && elapsed >= 250)
+            AppLog.i("AapTransport: slow USB write completed (${size} bytes, ${elapsed}ms)")
         return sent
     }
 
@@ -154,6 +176,8 @@ class AapTransport(
 
     val isWireless: Boolean
         get() = connection is SocketProjectionConnection
+    internal val usbOutMaxPacketSize: Int
+        get() = (connection as? AbstractUsbProjectionConnection)?.outMaxPacketSize ?: 0
     var ignoreNextStopRequest: Boolean = false
     /** Why the last [startHandshake] failed, for callers that report it. */
     enum class HandshakeFailure {
@@ -222,31 +246,6 @@ class AapTransport(
     }
     private val presentationSession = AaPresentationSession()
     private var sendHandler: Handler? = null
-    private val sendHandlerCallback = Handler.Callback {
-        // Timed because the media channels are flow-controlled: acks that stay in here stall video
-        // and audio together and leave control traffic alone, which is indistinguishable from the
-        // phone going quiet unless one end or the other is actually measured. This thread serves one
-        // socket, so the write's own duration is the time the uplink refused to drain.
-        val startedMs = SystemClock.elapsedRealtime()
-        val queueMs = (SystemClock.uptimeMillis() - it.`when`).coerceAtLeast(0)
-        val result = this.sendEncryptedMessage(
-            data = it.obj as ByteArray,
-            length = it.arg2
-        )
-        if (result < 0) return@Callback true
-        val finishedMs = SystemClock.elapsedRealtime()
-        val channel = (it.obj as ByteArray)[0].toInt() and 0xff
-        if (audioTimingActive && Channel.isAudio(channel) && finishedMs >= nextSendTimingMs &&
-            (queueMs >= 50 || finishedMs - startedMs >= 50)) {
-            val line = "Audio transport send channel=$channel queue=${queueMs}ms encryptWrite=${finishedMs - startedMs}ms"
-            AudioDiagnostics.record(finishedMs, line)
-            AppLog.w(line)
-            nextSendTimingMs = finishedMs + 1000
-        }
-        uplinkStallMonitor.onWrite(finishedMs - startedMs, finishedMs)
-            ?.let { report -> AppLog.i("AapTransport: %s", report) }
-        return@Callback true
-    }
 
     val isAlive: Boolean
         get() = pollThread?.isAlive ?: false
@@ -328,7 +327,16 @@ class AapTransport(
 
     private val micSessions = MicSessionController(
         lifecycle = MicRecorder::postLifecycle,
-        sending = { job -> sendHandler?.post(job) },
+        sending = { job ->
+            enqueueOutbound(
+                PriorityOutboundQueue.Priority.MICROPHONE,
+                OutboundWork(
+                    label = "microphone",
+                    channel = Channel.ID_MIC,
+                    action = { job.invoke(); null },
+                ),
+            )
+        },
         startCapture = { captured ->
             micRecorder.listener = object : MicRecorder.Listener {
                 override fun onMicDataAvailable(mic_buf: ByteArray, mic_audio_len: Int, peak: Int) =
@@ -773,6 +781,121 @@ class AapTransport(
         return -1
     }
 
+    /** Runs only on the send worker; one batch therefore remains one ordered TLS record. */
+    private fun drainReadyMediaAcks() {
+        if (Thread.currentThread() !== sendThread) {
+            scheduleMediaAckFlush()
+            return
+        }
+        if (!enqueueMediaAckBatches(mediaAcks.drainReady(SystemClock.elapsedRealtime()))) return
+        scheduleMediaAckFlush()
+    }
+
+    private fun scheduleMediaAckFlush() {
+        val handler = sendHandler ?: return
+        val delay = mediaAcks.nextDelayMs(SystemClock.elapsedRealtime()) ?: return
+        handler.removeCallbacks(mediaAckFlushRunnable)
+        if (delay == 0L) handler.post(mediaAckFlushRunnable)
+        else handler.postDelayed(mediaAckFlushRunnable, delay)
+    }
+
+    private fun enqueueMediaAckBatches(batches: List<MediaAckAccumulator.Batch>): Boolean {
+        for (batch in batches) {
+            val ack = MediaAck(batch.channel, batch.sessionId, batch.credits)
+            if (!enqueueOutbound(
+                    PriorityOutboundQueue.Priority.ACK,
+                    OutboundWork("media ACK", batch.channel) {
+                        sendEncryptedMessage(ack.data, ack.size)
+                    },
+                )) return false
+        }
+        return true
+    }
+
+    private fun writeMediaAckBatches(batches: List<MediaAckAccumulator.Batch>): Boolean {
+        for (batch in batches) {
+            val ack = MediaAck(batch.channel, batch.sessionId, batch.credits)
+            if (sendEncryptedMessage(ack.data, ack.size) < 0) return false
+        }
+        return true
+    }
+
+    /** Called from FinalMessageDelivery on the writer, including when it jumps ahead of the queue. */
+    private fun flushMediaAcksForShutdown(): Boolean {
+        sendHandler?.removeCallbacks(mediaAckFlushRunnable)
+        for (entry in outbound.drain(PriorityOutboundQueue.Priority.ACK)) {
+            if (!executeOutbound(entry)) return false
+        }
+        return writeMediaAckBatches(mediaAcks.drainAll())
+    }
+
+    private fun enqueueOutbound(
+        priority: PriorityOutboundQueue.Priority,
+        work: OutboundWork,
+        replaceKey: Any? = null,
+    ): Boolean {
+        if (closing) return false
+        val handler = sendHandler ?: return false
+        val entry = PriorityOutboundQueue.Entry(
+            value = work,
+            priority = priority,
+            channel = work.channel,
+            replaceKey = replaceKey,
+            enqueuedMs = outboundClockMs(),
+        )
+        val result = outbound.offer(entry)
+        if (result == PriorityOutboundQueue.Offer.REJECTED) {
+            AppLog.w("AapTransport: outbound queue rejected ${work.label} priority=$priority size=${outbound.size()}")
+            if (priority.isCritical) quit()
+            return false
+        }
+        if (scheduleOutboundDrain(handler)) return true
+        outbound.remove(entry)
+        return false
+    }
+
+    private fun scheduleOutboundDrain(): Boolean {
+        val handler = sendHandler ?: return false
+        return scheduleOutboundDrain(handler)
+    }
+
+    private fun scheduleOutboundDrain(handler: Handler): Boolean {
+        if (!outboundDrainScheduled.compareAndSet(false, true)) return true
+        if (handler.post(outboundDrainRunnable)) return true
+        outboundDrainScheduled.set(false)
+        return false
+    }
+
+    private fun drainOneOutbound() {
+        outboundDrainScheduled.set(false)
+        val entry = outbound.poll() ?: return
+        if (!executeOutbound(entry)) return
+        if (!outbound.isEmpty()) scheduleOutboundDrain()
+    }
+
+    private fun executeOutbound(entry: PriorityOutboundQueue.Entry<OutboundWork>): Boolean {
+        val startedMs = outboundClockMs()
+        val queueMs = (startedMs - entry.enqueuedMs).coerceAtLeast(0)
+        val result = entry.value.action()
+        if (result != null && result < 0) return false
+        val finishedMs = outboundClockMs()
+        val channel = entry.channel
+        if (channel != null && audioTimingActive && Channel.isAudio(channel) &&
+            finishedMs >= nextSendTimingMs && (queueMs >= 50 || finishedMs - startedMs >= 50)) {
+            val line = "Audio transport send channel=$channel queue=${queueMs}ms encryptWrite=${finishedMs - startedMs}ms"
+            AudioDiagnostics.record(finishedMs, line)
+            AppLog.w(line)
+            nextSendTimingMs = finishedMs + 1000
+        }
+        if (result != null) {
+            uplinkStallMonitor.onWrite(finishedMs - startedMs, finishedMs)
+                ?.let { report -> AppLog.i("AapTransport: %s", report) }
+        }
+        return true
+    }
+
+    private fun outboundClockMs(): Long = System.nanoTime() / 1_000_000L
+
     internal fun pauseForSleep() {
         AppLog.i("AapTransport: Pausing media/audio/mic and hardware video decoder for sleep")
         aapAudio.pauseAllAudio()
@@ -790,12 +913,15 @@ class AapTransport(
             AapMessage(Channel.ID_CTR, Control.ControlMsgType.MESSAGE_BYEBYE_REQUEST_VALUE, byebye)
         try {
             val handler = sendHandler
-            // The current write keeps its TLS order; ByeBye goes ahead of queued media ACKs.
-            // The deadline still bounds shutdown when that in-flight write cannot finish.
+            // The current write keeps its TLS order. Credits already earned by reader/video
+            // workers leave before ByeBye even when this final delivery jumps ahead of the queue.
+            // The same deadline still bounds shutdown when an in-flight write cannot finish.
             val delivery = FinalMessageDelivery.send(
                 onWriterThread = Thread.currentThread() === sendThread,
                 enqueueFirst = { handler?.postAtFrontOfQueue(it) == true },
-                write = { sendEncryptedMessage(msg.data, msg.size) == 0 },
+                write = {
+                    flushMediaAcksForShutdown() && sendEncryptedMessage(msg.data, msg.size) == 0
+                },
             )
             AppLog.i("AapTransport: ByeBye write $delivery")
         } finally {
@@ -846,6 +972,11 @@ class AapTransport(
             cleanupStep("microphone") { retireMicrophone() }
             sendHandler?.removeCallbacks(focusCycleGainRunnable)
             sendHandler?.removeCallbacks(unrepairedCheckRunnable)
+            sendHandler?.removeCallbacks(mediaAckFlushRunnable)
+            mediaAcks.clear()
+            sendHandler?.removeCallbacks(outboundDrainRunnable)
+            outboundDrainScheduled.set(false)
+            outbound.clear()
             pollThread?.quit()
             sendThread?.quit()
             videoThread?.quit()
@@ -1027,7 +1158,7 @@ class AapTransport(
 
                 sendThread = HandlerThread("AapTransport:Handler::Send", Process.THREAD_PRIORITY_AUDIO)
                 sendThread!!.start()
-                sendHandler = Handler(sendThread!!.looper, sendHandlerCallback)
+                sendHandler = Handler(sendThread!!.looper)
                 sendHandler?.post { LegacyOptimizer.setHighPriority() }
 
                 pollThread = HandlerThread("AapTransport:Handler::Poll", Process.THREAD_PRIORITY_AUDIO)
@@ -1090,7 +1221,10 @@ class AapTransport(
     private fun handshake(connection: ProjectionConnection): Boolean {
         lastHandshakeFailure = HandshakeFailure.OTHER
         try {
-            val isUsb = connection.type == ProjectionConnection.Type.USB
+            // A test double can violate Kotlin's non-null contract; keep diagnostics from turning
+            // that into a handshake failure while production connections still report USB/WIFI.
+            val connectionType: ProjectionConnection.Type? = connection.type
+            val isUsb = connectionType == ProjectionConnection.Type.USB
             // Increased delay for AA 16.4+ stability on USB - skip for Sockets
             if (isUsb) {
                 SystemClock.sleep(500)
@@ -1220,13 +1354,11 @@ class AapTransport(
                             return false
                         }
                         negotiatedVersion = negotiated
-                        AppLog.i("Handshake: the phone selected ${negotiated.major}.${negotiated.minor} " +
-                            "(we asked for ${AapVersionNegotiation.ANNOUNCED_MAJOR}.${AapVersionNegotiation.ANNOUNCED_MINOR}), status ${negotiated.statusName}")
-                        negotiated.requestedConfig?.let {
-                            AppLog.i("Handshake: the phone asks for ping timeout " +
-                                "${it.pingConfiguration.timeoutMs}ms, read timeout " +
-                                "${it.wirelessTcpConfiguration.socketReadTimeoutMs}ms")
-                        }
+                        AppLog.i(AapVersionDiagnostics.summarize(
+                            negotiated,
+                            connectionType?.name ?: "UNKNOWN",
+                            frame.size
+                        ))
                         received = true
                         versionFrameSize = frame.size
                         break
@@ -1275,10 +1407,12 @@ class AapTransport(
             ssl.postHandshakeReset()
             (ssl as? AapSslContext)?.onPeerClose = ::notePeerClose
             ssl.setControlRecordListener {
-                sendHandler?.post {
-                    val sent = tlsWriter.flushControl()
-                    if (!sent) quit()
-                }
+                enqueueOutbound(
+                    PriorityOutboundQueue.Priority.CONTROL,
+                    OutboundWork("TLS control", Channel.ID_CTR) {
+                        if (tlsWriter.flushControl()) 0 else { quit(); -1 }
+                    },
+                )
             }
             AppLog.d("Handshake: SSL buffers reset after handshake.")
 
@@ -1331,8 +1465,9 @@ class AapTransport(
 
     fun send(sensor: SensorEvent): Boolean {
         if (isAlive && startedSensors.contains(sensor.sensorType)) {
-            send(sensor as AapMessage)
-            return true
+            val sent = enqueueMessage(sensor, replaceKey = "sensor:${sensor.sensorType}")
+            if (!sent) noteDroppedSensorEvent(sensor.sensorType)
+            return sent
         }
         noteDroppedSensorEvent(sensor.sensorType)
         return false
@@ -1405,18 +1540,25 @@ class AapTransport(
     private fun isVideoFocusGain(message: AapMessage): Boolean =
         message.parse(Media.VideoFocusNotification.newBuilder()).mode == Media.VideoFocusMode.VIDEO_FOCUS_PROJECTED
 
-    private fun enqueueMessage(message: AapMessage): Boolean {
-        val handler = sendHandler
-        if (handler == null) {
-            AppLog.i("Cannot send message, handler is null (quitting?)")
-            return false
-        } else {
-            if (AppLog.LOG_VERBOSE) {
-                AppLog.v(message.toString())
-            }
-            val msg = handler.obtainMessage(MSG_SEND, 0, message.size, message.data)
-            return handler.sendMessage(msg)
+    private fun enqueueMessage(message: AapMessage, replaceKey: Any? = null): Boolean {
+        if (AppLog.LOG_VERBOSE) AppLog.v(message.toString())
+        val priority = when {
+            message is MediaAck -> PriorityOutboundQueue.Priority.ACK
+            message.channel == Channel.ID_CTR || MsgType.isControl(message.type) ->
+                PriorityOutboundQueue.Priority.CONTROL
+            message.channel == Channel.ID_MIC -> PriorityOutboundQueue.Priority.MICROPHONE
+            message.channel == Channel.ID_INP -> PriorityOutboundQueue.Priority.INPUT
+            Channel.isAudio(message.channel) -> PriorityOutboundQueue.Priority.AUDIO_NOTICE
+            message.channel == Channel.ID_SEN -> PriorityOutboundQueue.Priority.ROUTINE_STATE
+            else -> PriorityOutboundQueue.Priority.DEFAULT
         }
+        return enqueueOutbound(
+            priority,
+            OutboundWork(message.toString(), message.channel) {
+                sendEncryptedMessage(message.data, message.size)
+            },
+            replaceKey,
+        )
     }
 
     internal fun gainVideoFocus() {
@@ -1424,10 +1566,16 @@ class AapTransport(
     }
 
     internal fun sendMediaAck(channel: Int, sessionId: Int = getSessionId(channel)) {
-        send(MediaAck(channel, sessionId))
+        // Match send(message): credits produced before AuthComplete or after retirement are not
+        // replayed into a different protocol lifetime.
+        if (!tlsWriter.isReady || closing) return
+        mediaAcks.credit(channel, sessionId, SystemClock.elapsedRealtime())
+        scheduleMediaAckFlush()
     }
 
     internal fun setSessionId(channel: Int, sessionId: Int) {
+        mediaAcks.markChannelReady(channel, SystemClock.elapsedRealtime())
+        scheduleMediaAckFlush()
         sessionIds.put(channel, sessionId)
     }
 
@@ -1458,8 +1606,6 @@ class AapTransport(
 
     companion object {
         private const val MSG_POLL = 1
-        private const val MSG_SEND = 2
-
         /** Pooled video payload copies: enough for a fragment run and the one behind it. */
         /**
          * Messages the video thread may be behind before the transport sheds.

@@ -20,10 +20,12 @@ class ScreenSettingsHashTest {
         videoFitMode: Int = 0,
         forcedScale: Boolean = false,
         normalisation: ScreenOrientationPolicy.Normalisation = ScreenOrientationPolicy.Normalisation.LANDSCAPE,
+        renderScalePercent: Int = RenderScalePolicy.FULL,
     ) = ScreenSettingsHash.of(
         resolutionId, dpiPixelDensity, pixelAspectRatioE4,
         insetLeft, insetTop, insetRight, insetBottom,
         viewMode, screenOrientation, fullscreenMode, videoFitMode, forcedScale, normalisation,
+        renderScalePercent,
     )
 
     @Test
@@ -45,6 +47,7 @@ class ScreenSettingsHashTest {
         assertNotEquals(base, hash(resolutionId = 3))
         assertNotEquals(base, hash(dpiPixelDensity = 213))
         assertNotEquals(base, hash(pixelAspectRatioE4 = 11250))
+        assertNotEquals(base, hash(renderScalePercent = 85))
         assertNotEquals(base, hash(insetLeft = 1))
         assertNotEquals(base, hash(insetTop = 1))
         assertNotEquals(base, hash(insetRight = 1))

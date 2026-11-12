@@ -64,8 +64,8 @@ object UsbDeviceIdentityPolicy {
      * FF/FF/00 triple, and only this string tells them apart: the accessory gadget names itself,
      * Android's MTP function names itself, and a network adapter names its own thing.
      */
-    private const val NAME_ACCESSORY = "Android Accessory Interface"
-    private const val NAME_MTP = "MTP"
+    const val NAME_ACCESSORY = "Android Accessory Interface"
+    const val NAME_MTP = "MTP"
 
     /**
      * CDC control subclasses that mean "this device carries a network". Keyed on these rather than

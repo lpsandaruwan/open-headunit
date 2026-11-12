@@ -91,4 +91,19 @@ class DecoderStallCausePolicyTest {
         // for, never a wait for the scheduled one.
         assertTrue(DecoderStallCausePolicy.KEYFRAME_STARVATION_PATIENCE_MS < 60_000L)
     }
+
+    @Test fun aGapInTheStreamIsNotAnInputGapOnceBytesReturn() {
+        assertEquals(false, DecoderStallCausePolicy.inputResumed(nowMs = 10_000, lastInputMs = 9_900))
+        assertEquals(false, DecoderStallCausePolicy.inputResumed(nowMs = 10_000, lastInputMs = 9_000))
+        assertEquals(true, DecoderStallCausePolicy.inputResumed(nowMs = 10_000, lastInputMs = 7_990))
+    }
+
+    @Test fun silenceBeforeTheStreamResumedDoesNotCountAgainstTheDecoder() {
+        // The box sent nothing for 2.0 s; the first bytes back arrive at t=12_000, the last frame was at t=10_000.
+        assertEquals(10, DecoderStallCausePolicy.silentWhileFedMs(nowMs = 12_010, lastOutputMs = 10_000, inputResumedMs = 12_000))
+        // A decoder that was fed all along and is silent for 2 s is still a stall.
+        assertEquals(2_050, DecoderStallCausePolicy.silentWhileFedMs(nowMs = 12_050, lastOutputMs = 10_000, inputResumedMs = 0))
+        // Output after the resume wins.
+        assertEquals(100, DecoderStallCausePolicy.silentWhileFedMs(nowMs = 12_300, lastOutputMs = 12_200, inputResumedMs = 12_000))
+    }
 }

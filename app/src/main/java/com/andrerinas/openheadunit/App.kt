@@ -45,6 +45,9 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
 
     override fun onCreate() {
         super.onCreate()
+        // Link has its own process: projection can restart without interrupting car samples.
+        // Avoid creating decoders, overlays or projection receivers in the telemetry process.
+        if (VehicleDataBridge.isTelemetryProcess(this)) return
         instance = this
         registerActivityLifecycleCallbacks(this)
 
@@ -146,6 +149,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
 
         val settings = Settings(this) // Create a Settings instance
         AppLog.init(settings, this) // Initialize AppLog with settings for conditional logging
+        VehicleDataBridge.start(this)
 
         // Sync auto-start settings to device-protected storage so that
         // BootCompleteReceiver, UsbAttachedActivity, and AutoStartReceiver

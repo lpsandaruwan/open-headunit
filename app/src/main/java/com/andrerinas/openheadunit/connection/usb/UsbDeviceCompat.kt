@@ -137,6 +137,22 @@ class UsbDeviceCompat(val wrappedDevice: UsbDevice) {
             else matchReason(device)
 
         /**
+         * The interface Android Auto runs over, chosen from the descriptors rather than by position
+         * (see [UsbInterfaceSelectionPolicy]). Both transports claim this one and no other, so a
+         * network function beside the accessory is left to the kernel driver.
+         */
+        fun accessoryInterface(device: UsbDevice): UsbInterface {
+            val interfaces = ArrayList<UsbDeviceIdentityPolicy.Interface>(device.interfaceCount)
+            for (i in 0 until device.interfaceCount) interfaces.add(describe(device.getInterface(i)))
+            val index = UsbInterfaceSelectionPolicy.selectAccessory(interfaces)
+            // Only worth a line when the answer is not the old one, which is when it matters.
+            if (index != 0) {
+                AppLog.i("USB: Android Auto runs on interface index $index of ${device.interfaceCount}")
+            }
+            return device.getInterface(index)
+        }
+
+        /**
          * The blacklist is the one reason a device the descriptors accept still will not connect,
          * and a user who set it months ago will not mention it in a bug report.
          */
@@ -167,6 +183,7 @@ class UsbDeviceCompat(val wrappedDevice: UsbDevice) {
                 false
             }
             return UsbPermissionAskPolicy.Inputs(
+                androidOffersNoHandler = UsbPermissionAskPolicy.androidOffersNoHandler(Build.BOARD, Build.MODEL),
                 accessory = isInAccessoryMode(device),
                 mtp = UsbPermissionAskPolicy.isMtp(described),
                 filterMatches = UsbManifestFilter.matches(described),
