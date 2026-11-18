@@ -1,6 +1,8 @@
 package com.andrerinas.openheadunit.utils
 
 import android.content.Context
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.ToneGenerator
 import android.os.Handler
@@ -37,7 +39,61 @@ object AudioStreamTester {
     // of generators, so the second tap could fail outright. Touched only from the UI thread.
     private var activeTone: ToneGenerator? = null
     private val handler = Handler(Looper.getMainLooper())
+    private var appContext: Context? = null
     private val releaseRunnable = Runnable { stopActiveTone() }
+
+    // Real playback asks Android for audio focus, and on car head units that request is what makes
+    // the vendor audio control open the amplifier path for a source. A tone played without it can
+    // reach the output and still be silent, which reads as a stream that does not work. So the tone
+    // holds transient focus for as long as it sounds, like the projection audio does.
+    private var focusRequest: AudioFocusRequest? = null
+    private var legacyFocusListener: AudioManager.OnAudioFocusChangeListener? = null
+
+    private fun takeFocus(context: Context, stream: Int) {
+        val audioManager = audioManager(context)
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= 26) {
+                val attributes = try {
+                    AudioAttributes.Builder().setLegacyStreamType(stream).build()
+                } catch (e: IllegalArgumentException) {
+                    // No public usage for some vendor streams; media is the closest honest claim.
+                    AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()
+                }
+                val request = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+                    .setAudioAttributes(attributes)
+                    .setOnAudioFocusChangeListener { }
+                    .build()
+                val result = audioManager.requestAudioFocus(request)
+                AppLog.i("AudioStreamTester: focus for stream $stream ${if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) "granted" else "refused ($result)"}")
+                focusRequest = request
+            } else {
+                val listener = AudioManager.OnAudioFocusChangeListener { }
+                @Suppress("DEPRECATION")
+                audioManager.requestAudioFocus(listener, stream, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+                legacyFocusListener = listener
+            }
+        } catch (e: RuntimeException) {
+            // The tone still plays; focus only decides whether an amplifier wakes for it.
+            AppLog.e("AudioStreamTester: could not take audio focus", e)
+        }
+    }
+
+    private fun dropFocus(context: Context) {
+        val audioManager = audioManager(context)
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= 26) {
+                focusRequest?.let { audioManager.abandonAudioFocusRequest(it) }
+            } else {
+                @Suppress("DEPRECATION")
+                legacyFocusListener?.let { audioManager.abandonAudioFocus(it) }
+            }
+        } catch (e: RuntimeException) {
+            AppLog.e("AudioStreamTester: could not release audio focus", e)
+        }
+        focusRequest = null
+        legacyFocusListener = null
+    }
 
     private fun audioManager(context: Context): AudioManager =
         context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -54,6 +110,7 @@ object AudioStreamTester {
             }
         }
         activeTone = null
+        appContext?.let { dropFocus(it) }
     }
 
     /** Streams this device accepts, in picker order. */
@@ -136,8 +193,10 @@ object AudioStreamTester {
             )
         }
 
+        appContext = context.applicationContext
         // Whatever the last tap started stops here, so the two are heard one after the other.
         stopActiveTone()
+        takeFocus(context.applicationContext, stream)
 
         val tone = try {
             ToneGenerator(stream, ToneGenerator.MAX_VOLUME)
