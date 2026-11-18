@@ -6,11 +6,11 @@ import com.andrerinas.openheadunit.connection.usb.UsbDeviceIdentityPolicy.Interf
  * Which interface of an accessory-mode device carries Android Auto.
  *
  * A plain AOAP device (0x2D00) has one interface, and a phone with ADB adds a second after it, so
- * "interface 0" used to be right. A device that also exposes a network function (the AI box adds
- * one beside the accessory so Link can use the same cable) lists that first, and Android counts
- * every alternate setting of a network data interface as an interface of its own. The accessory
- * can then sit at any index, which is why the choice is made from the descriptors and not by
- * position. Both USB transports ask here so they cannot drift apart.
+ * "interface 0" used to be right. A device that lists another function first, such as a network
+ * or serial function, breaks that: the accessory can then sit at any index, and claiming the wrong
+ * interface shows up as repeated disconnect messages. Android also counts every alternate setting
+ * of a network data interface as an interface of its own, which is why the choice is made from the
+ * descriptors and not by position. Both USB transports ask here so they cannot drift apart.
  */
 object UsbInterfaceSelectionPolicy {
 
