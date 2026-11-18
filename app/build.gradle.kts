@@ -108,12 +108,12 @@ android {
         if (embedOablLink) minSdk = 26
         targetSdk = 36
         versionCode = when {
-            embedOablLink -> 136
+            embedOablLink -> 137
             dongfengVysor -> 135
             else -> 123
         }
         versionName = "4.0.0"
-        if (embedOablLink) versionNameSuffix = "-oabl-link-bt9"
+        if (embedOablLink) versionNameSuffix = "-oabl-link-bt10"
         else if (dongfengVysor) versionNameSuffix = "-dongfeng-android8"
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
